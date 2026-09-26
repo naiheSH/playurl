@@ -1,0 +1,13 @@
+{
+  "capability_boundary": "公开搜索歌曲或视频。 入口 scripts/runtime.py，action=search。\n公开搜索歌单或播放列表。 入口 scripts/runtime.py，action=playlist_search。\n读取指定歌单或播放列表的曲目。 入口 scripts/runtime.py，action=playlist_tracks。\n读取当前账号的歌单。 入口 scripts/runtime.py，action=playlist_mine。\n解析播放结果或官方播放方式。 入口 scripts/runtime.py，action=playurl。\n检查当前平台凭据。 入口 scripts/runtime.py，action=check。",
+  "description": "通过 Spotify 官方 API 搜索歌曲和歌单、读取账号歌单、检查 OAuth 并返回官方播放方式。",
+  "display_name": "Spotify 元数据与官方播放",
+  "out_of_scope_boundary": "非当前平台的搜索或播放",
+  "skill_name": "playurl-spotify",
+  "test_cases": [],
+  "tools": [
+    "gf-service-kv-get",
+    "gf-service-kv-set"
+  ],
+  "version": "2.0.0"
+}

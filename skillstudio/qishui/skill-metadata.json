@@ -1,0 +1,13 @@
+{
+  "capability_boundary": "公开搜索歌曲或视频。 入口 scripts/runtime.py，action=search。\n公开搜索歌单或播放列表。 入口 scripts/runtime.py，action=playlist_search。\n读取指定歌单或播放列表的曲目。 入口 scripts/runtime.py，action=playlist_tracks。\n读取当前账号的歌单。 入口 scripts/runtime.py，action=playlist_mine。\n解析播放结果或官方播放方式。 入口 scripts/runtime.py，action=playurl。\n检查当前平台凭据。 入口 scripts/runtime.py，action=check。",
+  "description": "搜索汽水音乐歌曲和歌单、读取个人歌单、解析 track_id 播放地址并检查 Cookie。",
+  "display_name": "汽水音乐搜索与播放地址解析",
+  "out_of_scope_boundary": "非当前平台的搜索或播放",
+  "skill_name": "playurl-qishui",
+  "test_cases": [],
+  "tools": [
+    "gf-service-kv-get",
+    "gf-service-kv-set"
+  ],
+  "version": "2.0.0"
+}

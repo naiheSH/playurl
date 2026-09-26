@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "codeEntrypoints": [
+    {
+      "capabilityId": "qishui-search-songs",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "qishui-search-playlists",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "qishui-list-playlist-tracks",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "qishui-list-my-playlists",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "qishui-resolve-play-url",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "qishui-check-credentials",
+      "entrypointPath": "scripts/runtime.py"
+    }
+  ]
+}

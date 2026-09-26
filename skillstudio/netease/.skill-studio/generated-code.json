@@ -1,0 +1,19 @@
+{
+  "generatedCode": [
+    {
+      "capability": "netease-search-songs",
+      "command": [
+        "python",
+        "scripts/runtime.py"
+      ],
+      "credentialBindings": [],
+      "dependencies": [],
+      "entrypoint": "scripts/runtime.py",
+      "inputSchema": {},
+      "language": "python",
+      "network": false,
+      "outputSchema": {},
+      "provider": null
+    }
+  ]
+}

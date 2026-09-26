@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "codeEntrypoints": [
+    {
+      "capabilityId": "kugou-search-songs",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "kugou-search-playlists",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "kugou-list-playlist-tracks",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "kugou-list-my-playlists",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "kugou-resolve-play-url",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "kugou-check-credentials",
+      "entrypointPath": "scripts/runtime.py"
+    }
+  ]
+}

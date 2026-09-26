@@ -1,0 +1,13 @@
+{
+  "capability_boundary": "公开搜索歌曲或视频。 入口 scripts/runtime.py，action=search。\n公开搜索歌单或播放列表。 入口 scripts/runtime.py，action=playlist_search。\n读取指定歌单或播放列表的曲目。 入口 scripts/runtime.py，action=playlist_tracks。\n解析播放结果或官方播放方式。 入口 scripts/runtime.py，action=playurl。\n检查当前平台凭据。 入口 scripts/runtime.py，action=check。",
+  "description": "使用 yt-dlp 搜索 YouTube 视频和播放列表，并解析短期 M4A 或 MP3 音频地址。",
+  "display_name": "YouTube 音频与播放列表",
+  "out_of_scope_boundary": "非当前平台的搜索或播放",
+  "skill_name": "playurl-youtube",
+  "test_cases": [],
+  "tools": [
+    "gf-service-kv-get",
+    "gf-service-kv-set"
+  ],
+  "version": "2.0.0"
+}

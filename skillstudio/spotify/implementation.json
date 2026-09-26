@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "codeEntrypoints": [
+    {
+      "capabilityId": "spotify-search-songs",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "spotify-search-playlists",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "spotify-list-playlist-tracks",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "spotify-list-my-playlists",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "spotify-resolve-play-url",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "spotify-check-credentials",
+      "entrypointPath": "scripts/runtime.py"
+    }
+  ]
+}

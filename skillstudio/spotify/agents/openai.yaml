@@ -1,0 +1,4 @@
+name: playurl-spotify
+description: 通过 Spotify 官方 API 搜索歌曲和歌单、读取账号歌单、检查 OAuth 并返回官方播放方式。
+system_prompt: >-
+  读取 SKILL.md 后按其中的能力边界和 JSON Code 入口执行；不要泄露 KV 凭据。

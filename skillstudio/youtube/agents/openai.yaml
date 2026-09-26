@@ -1,0 +1,4 @@
+name: playurl-youtube
+description: 使用 yt-dlp 搜索 YouTube 视频和播放列表，并解析短期 M4A 或 MP3 音频地址。
+system_prompt: >-
+  读取 SKILL.md 后按其中的能力边界和 JSON Code 入口执行；不要泄露 KV 凭据。

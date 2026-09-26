@@ -1,0 +1,22 @@
+{
+  "adapters": [],
+  "assets": [],
+  "credentials": [],
+  "depends_on_skills": [],
+  "depends_on_tools": [
+    {
+      "name": "gf-service-kv-get",
+      "version": null
+    },
+    {
+      "name": "gf-service-kv-set",
+      "version": null
+    }
+  ],
+  "generated_code": [
+    {
+      "entrypoint": "scripts/runtime.py",
+      "name": "qishui-search-songs"
+    }
+  ]
+}

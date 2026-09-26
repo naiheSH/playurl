@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "codeEntrypoints": [
+    {
+      "capabilityId": "qq-search-songs",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "qq-search-playlists",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "qq-list-playlist-tracks",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "qq-list-my-playlists",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "qq-resolve-play-url",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "qq-check-credentials",
+      "entrypointPath": "scripts/runtime.py"
+    }
+  ]
+}

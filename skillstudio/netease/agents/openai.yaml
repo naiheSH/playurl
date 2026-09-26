@@ -1,0 +1,4 @@
+name: playurl-netease
+description: 搜索网易云音乐歌曲和歌单、读取歌单曲目、解析短期播放地址并检查 MUSIC_U。
+system_prompt: >-
+  读取 SKILL.md 后按其中的能力边界和 JSON Code 入口执行；不要泄露 KV 凭据。

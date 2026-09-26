@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "codeEntrypoints": [
+    {
+      "capabilityId": "youtube-search-songs",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "youtube-search-playlists",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "youtube-list-playlist-tracks",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "youtube-resolve-play-url",
+      "entrypointPath": "scripts/runtime.py"
+    },
+    {
+      "capabilityId": "youtube-check-credentials",
+      "entrypointPath": "scripts/runtime.py"
+    }
+  ]
+}

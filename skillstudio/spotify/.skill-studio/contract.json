@@ -1,0 +1,541 @@
+{
+  "activation": {
+    "examples": [
+      "搜索Spotify 元数据与官方播放中的歌曲",
+      "搜索歌单并列出曲目",
+      "解析播放地址",
+      "检查凭据"
+    ],
+    "notWhen": [
+      "非当前平台的搜索或播放"
+    ],
+    "when": "通过 Spotify 官方 API 搜索歌曲和歌单、读取账号歌单、检查 OAuth 并返回官方播放方式。"
+  },
+  "capabilities": [
+    {
+      "capabilityId": "spotify-search-songs",
+      "dependencies": [
+        {
+          "kind": "tool",
+          "binding": "gf-service-kv-get"
+        },
+        {
+          "kind": "code"
+        }
+      ],
+      "description": "公开搜索歌曲或视频。 入口 scripts/runtime.py，action=search。",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "action",
+          "query",
+          "credentials"
+        ],
+        "properties": {
+          "action": {
+            "const": "search"
+          },
+          "query": {
+            "type": "string",
+            "minLength": 1
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "default": 10
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000,
+            "default": 0
+          },
+          "timeout": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 300
+          },
+          "credentials": {
+            "type": [
+              "object",
+              "string"
+            ],
+            "writeOnly": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "capabilityId": "spotify-search-playlists",
+      "dependencies": [
+        {
+          "kind": "tool",
+          "binding": "gf-service-kv-get"
+        },
+        {
+          "kind": "code"
+        }
+      ],
+      "description": "公开搜索歌单或播放列表。 入口 scripts/runtime.py，action=playlist_search。",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "action",
+          "query",
+          "credentials"
+        ],
+        "properties": {
+          "action": {
+            "const": "playlist_search"
+          },
+          "query": {
+            "type": "string",
+            "minLength": 1
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "default": 10
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000,
+            "default": 0
+          },
+          "timeout": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 300
+          },
+          "credentials": {
+            "type": [
+              "object",
+              "string"
+            ],
+            "writeOnly": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "capabilityId": "spotify-list-playlist-tracks",
+      "dependencies": [
+        {
+          "kind": "tool",
+          "binding": "gf-service-kv-get"
+        },
+        {
+          "kind": "code"
+        }
+      ],
+      "description": "读取指定歌单或播放列表的曲目。 入口 scripts/runtime.py，action=playlist_tracks。",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "action",
+          "id",
+          "credentials"
+        ],
+        "properties": {
+          "action": {
+            "const": "playlist_tracks"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 50
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000,
+            "default": 0
+          },
+          "timeout": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 300
+          },
+          "credentials": {
+            "type": [
+              "object",
+              "string"
+            ],
+            "writeOnly": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "capabilityId": "spotify-list-my-playlists",
+      "dependencies": [
+        {
+          "kind": "tool",
+          "binding": "gf-service-kv-get"
+        },
+        {
+          "kind": "code"
+        }
+      ],
+      "description": "读取当前账号的歌单。 入口 scripts/runtime.py，action=playlist_mine。",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "action",
+          "credentials"
+        ],
+        "properties": {
+          "action": {
+            "const": "playlist_mine"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 30
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000,
+            "default": 0
+          },
+          "timeout": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 300
+          },
+          "credentials": {
+            "type": [
+              "object",
+              "string"
+            ],
+            "writeOnly": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "capabilityId": "spotify-resolve-play-url",
+      "dependencies": [
+        {
+          "kind": "code"
+        }
+      ],
+      "description": "解析播放结果或官方播放方式。 入口 scripts/runtime.py，action=playurl。",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "action",
+          "id"
+        ],
+        "properties": {
+          "action": {
+            "const": "playurl"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "timeout": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 300
+          },
+          "credentials": {
+            "type": [
+              "object",
+              "string"
+            ],
+            "writeOnly": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "capabilityId": "spotify-check-credentials",
+      "dependencies": [
+        {
+          "kind": "tool",
+          "binding": "gf-service-kv-get"
+        },
+        {
+          "kind": "tool",
+          "binding": "gf-service-kv-set"
+        },
+        {
+          "kind": "code"
+        }
+      ],
+      "description": "检查当前平台凭据。 入口 scripts/runtime.py，action=check。",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "action",
+          "credentials"
+        ],
+        "properties": {
+          "action": {
+            "const": "check"
+          },
+          "timeout": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 300
+          },
+          "credentials": {
+            "type": [
+              "object",
+              "string"
+            ],
+            "writeOnly": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "capability_contract": {
+    "depends_on_skills": [],
+    "depends_on_tools": [
+      {
+        "name": "gf-service-kv-get",
+        "version": null
+      },
+      {
+        "name": "gf-service-kv-set",
+        "version": null
+      }
+    ],
+    "generated_capabilities": [
+      {
+        "entrypoint": "scripts/runtime.py",
+        "name": "spotify-search-songs"
+      }
+    ]
+  },
+  "identity": {
+    "display_name": "Spotify 元数据与官方播放",
+    "name": "playurl-spotify",
+    "visibility": "public"
+  },
+  "runtime_contract": {
+    "generated_code": [
+      {
+        "capability": "spotify-search-songs",
+        "credentialRefs": [],
+        "dependencies": [],
+        "entrypointPath": "scripts/runtime.py",
+        "language": "python",
+        "network": "forbidden",
+        "runtimeVersion": "3.13"
+      }
+    ],
+    "runtime_context": {
+      "device_id": {
+        "runtime_key": "deviceId",
+        "source": "runtime_context"
+      },
+      "session_id": {
+        "runtime_key": "sessionId",
+        "source": "runtime_context"
+      },
+      "user_id": {
+        "runtime_key": "userId",
+        "source": "runtime_context"
+      }
+    }
+  },
+  "schema_version": "skill-studio-create/submission-v1",
+  "verification_contract": {
+    "cases": [],
+    "cases_uri": "cases/verification.cases.json"
+  }
+}

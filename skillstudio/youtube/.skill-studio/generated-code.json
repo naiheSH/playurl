@@ -1,0 +1,21 @@
+{
+  "generatedCode": [
+    {
+      "capability": "youtube-search-songs",
+      "command": [
+        "python",
+        "scripts/runtime.py"
+      ],
+      "credentialBindings": [],
+      "dependencies": [
+        "yt-dlp"
+      ],
+      "entrypoint": "scripts/runtime.py",
+      "inputSchema": {},
+      "language": "python",
+      "network": false,
+      "outputSchema": {},
+      "provider": null
+    }
+  ]
+}

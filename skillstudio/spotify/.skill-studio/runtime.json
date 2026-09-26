@@ -1,0 +1,27 @@
+{
+  "generated_code": [
+    {
+      "capability": "spotify-search-songs",
+      "credentialRefs": [],
+      "dependencies": [],
+      "entrypointPath": "scripts/runtime.py",
+      "language": "python",
+      "network": "forbidden",
+      "runtimeVersion": "3.13"
+    }
+  ],
+  "runtime_context": {
+    "device_id": {
+      "runtime_key": "deviceId",
+      "source": "runtime_context"
+    },
+    "session_id": {
+      "runtime_key": "sessionId",
+      "source": "runtime_context"
+    },
+    "user_id": {
+      "runtime_key": "userId",
+      "source": "runtime_context"
+    }
+  }
+}

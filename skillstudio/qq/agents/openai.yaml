@@ -1,0 +1,4 @@
+name: playurl-qq
+description: 搜索 QQ 音乐歌曲和歌单、读取个人或公开歌单、解析短期播放地址并检查 Cookie。
+system_prompt: >-
+  读取 SKILL.md 后按其中的能力边界和 JSON Code 入口执行；不要泄露 KV 凭据。

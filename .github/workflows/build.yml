@@ -1,12 +1,12 @@
-name: build
+name: build-skill-studio
 
-# 每个国内平台单独打 zip。脚本放进 scripts/，说明文件留在包根目录。CI 各上传一个 artifact，打 tag 时发布四个 zip。不含根 doc。
+# skill-studio 分支只构建四个国内平台的 Skill Studio 包，并上传到 main 共用的 v2.0.0 Release。
 
 on:
   workflow_dispatch:
   push:
-    branches: [main]
-    tags: ["v*"]
+    branches: [skill-studio]
+    tags: ["v*-skill-studio"]
 
 permissions:
   contents: write
@@ -30,10 +30,13 @@ jobs:
           python-version: ${{ matrix.python }}
 
       - name: Run unit tests
-        run: python -B -m unittest discover -s tests -v
+        run: |
+          python -B -m unittest discover -s tests -v
+          python -B -m unittest discover -s skillstudio/tests -v
+          python -B -m unittest discover -s skillstudio/kugou/tests -v
 
       - name: Compile Python sources
-        run: python -m compileall -q netease qq kugou qishui spotify youtube tests
+        run: python -m compileall -q netease qq kugou qishui skillstudio tests
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -45,7 +48,7 @@ jobs:
           node --check qishui/login.cjs
           node qishui/login.cjs --self-test
 
-  package:
+  package-skill-studio:
     needs: test
     runs-on: ubuntu-latest
     strategy:
@@ -56,89 +59,80 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Pack platform
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Pack Skill Studio platform
         run: |
           set -euo pipefail
           platform="${{ matrix.platform }}"
-          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
-            version="${GITHUB_REF_NAME#v}"
-          else
-            version="${GITHUB_SHA::7}"
-          fi
-          stage="$(mktemp -d)"
-          mkdir -p "$stage/scripts" dist
-          git archive --format=tar "HEAD:${platform}" | tar -x -C "$stage/scripts"
-          find "$stage/scripts" -maxdepth 1 -type f ! -name '*.py' ! -name '*.cjs' -exec mv {} "$stage/" \;
-          archive="$PWD/dist/${platform}-${version}.zip"
-          (cd "$stage" && zip -qr "$archive" .)
-          rm -rf "$stage"
+          python skillstudio/build_platforms.py "$platform" --version 2.0.0 --output-dir dist
+          archive="$PWD/dist/playurl-${platform}-skill-studio-2.0.0.zip"
+          test -f "$archive"
+          unzip -tqq "$archive"
           unzip -Z1 "$archive" > "dist/${platform}.txt"
-          awk -F/ '
-            {
-              for (i = 1; i <= NF; i++) {
-                if ($i == "cookie" || $i == "token" || $i == "credentials" || $i == "credentials.json" || $i == "cookies.txt" || $i == "tests" || $i == "doc" || $i == "spotify" || $i == "youtube" || $i == "__pycache__" || $i == ".venv") {
-                  print "forbidden path: " $0 > "/dev/stderr"
-                  exit 1
-                }
-              }
-              if ($1 != "scripts" && $1 != "SKILL.md" && $1 != "README.md" && $1 != "requirements.txt" && $1 != "requirements-terminal.txt" && $1 != "THIRD_PARTY_NOTICES.md" && $1 != "LICENSE.ly-music-source") exit 1
-            }
-          ' "dist/${platform}.txt"
+          grep -Fxq "scripts/runtime.py" "dist/${platform}.txt"
           grep -Fxq "scripts/playurl.py" "dist/${platform}.txt"
-          grep -Fxq "scripts/search.py" "dist/${platform}.txt"
-          grep -Fxq "SKILL.md" "dist/${platform}.txt"
-          grep -Fxq "README.md" "dist/${platform}.txt"
+          grep -Fxq ".skill-studio/contract.json" "dist/${platform}.txt"
+          grep -Fxq "implementation.json" "dist/${platform}.txt"
+          if awk -F/ '{print $NF}' "dist/${platform}.txt" | grep -Eq '^(login\.py|auth\.py|device\.py|cookie|token|credentials|credentials\.json|cookies\.txt|request\.json)$'; then
+            echo "forbidden credential or login file in $archive" >&2
+            exit 1
+          fi
           unzip -Z1 "$archive"
 
-      - name: Upload package
+      - name: Upload Skill Studio package
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.platform }}
-          path: dist/${{ matrix.platform }}-*.zip
+          name: skill-studio-${{ matrix.platform }}
+          path: dist/playurl-${{ matrix.platform }}-skill-studio-2.0.0.zip
           if-no-files-found: error
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: package
+    needs: package-skill-studio
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Download netease
+      - name: Download Skill Studio netease
         uses: actions/download-artifact@v4
         with:
-          name: netease
+          name: skill-studio-netease
           path: dist
-      - name: Download qq
+      - name: Download Skill Studio qq
         uses: actions/download-artifact@v4
         with:
-          name: qq
+          name: skill-studio-qq
           path: dist
-      - name: Download kugou
+      - name: Download Skill Studio kugou
         uses: actions/download-artifact@v4
         with:
-          name: kugou
+          name: skill-studio-kugou
           path: dist
-      - name: Download qishui
+      - name: Download Skill Studio qishui
         uses: actions/download-artifact@v4
         with:
-          name: qishui
+          name: skill-studio-qishui
           path: dist
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: v1.0.0
+          RELEASE_TAG: v2.0.0
         run: |
           set -euo pipefail
           ls -R dist
-          test "$(find dist -name '*.zip' | wc -l)" -eq 4
+          test "$(find dist -name 'playurl-*-skill-studio-2.0.0.zip' | wc -l)" -eq 4
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" dist/*.zip --clobber
+            gh release edit "$RELEASE_TAG" --title "$RELEASE_TAG" --notes-file doc/RELEASE_NOTES_v2.0.0.md
           else
             gh release create "$RELEASE_TAG" dist/*.zip \
-              --target "$GITHUB_SHA" \
+              --target main \
               --title "$RELEASE_TAG" \
-              --generate-notes
+              --notes-file doc/RELEASE_NOTES_v2.0.0.md
           fi
