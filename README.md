@@ -141,7 +141,7 @@ QQ 账号登录需要 `uin` 和 `qm_keyst`、`qqmusic_key` 或 `music_key`；微
 
 ### 汽水
 
-搜索 ID 是 `item_id`。个人歌单和会员播放读取同目录 `cookie`；登录字段包括 `sessionid`、`sessionid_ss`、`sid_guard`、`sid_tt`、`uid_tt` 或 `uid_tt_ss`。默认用 `login.py` 纯 HTTP 扫码，不打开浏览器。`/luna/pc/track_v2` 仍可能返回空正文。
+搜索 ID 是 `item_id`。个人歌单和登录播放读取同目录 `cookie`，核心凭据是 `sessionid`；完整 Cookie 失败时自动使用核心会话重试，不按 `sid_guard` 日期提前判定过期。默认用 `login.py` 纯 HTTP 扫码，不打开浏览器。`/luna/pc/track_v2` 仍可能返回空正文。
 
 公开歌曲搜索只稳定覆盖首批最多约 30 条候选，歌曲 `offset` 只在该批次中切片；公开歌单搜索可按记录序号继续翻页。
 

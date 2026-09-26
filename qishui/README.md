@@ -9,7 +9,7 @@
 - `playurl.py`：用 `track_id` 请求播放地址，并可解密带 `#auth=` 的音频。
 - `auth.py`：可复用的 Python 登录 API，纯 HTTP 创建/轮询二维码、处理短信二次验证和保存 Cookie；只使用标准库。
 - `login.py`：`auth.py` 的命令行封装，默认不打开浏览器；`--browser` 是显式兜底。
-- `check.py`：请求只读账号接口，判断 Cookie 是否真实有效或已过期。
+- `check.py`：请求只读账号接口；完整 Cookie 失败时用核心 `sessionid` 复检。
 - `login.cjs`：同一流程的自包含 Node.js 18+ 单文件版本，无需 `npm install`。
 - `requirements.txt`：仅终端绘制二维码或 `--browser` 兜底需要，基础 Python 登录不需要安装。
 - `THIRD_PARTY_NOTICES.md`：登录协议实现与内嵌二维码组件的来源、版本及许可证说明。
@@ -120,7 +120,7 @@ node playurl/qishui/login.cjs --self-test
 
 公开歌曲搜索接口只稳定提供首批最多约 30 条候选；歌曲搜索的 `offset` 是在这批候选中切片，达到 30 后会返回空列表。公开歌单搜索支持继续按记录序号翻页，不受这个限制。
 
-公开歌单搜索和公开歌单 `tracks` 不需要 Cookie。搜索使用汽水 PC 歌单搜索协议，`offset` 是记录序号；`tracks` 返回的歌曲 `id` 可逐首交给 `playurl.py`。`mine`、`liked` 和 `recent` 读取同目录 Cookie；`liked` 会自动映射到账号真实的“我喜欢的音乐”歌单。
+公开歌单搜索和公开歌单 `tracks` 不需要 Cookie。搜索使用汽水 PC 歌单搜索协议，`offset` 是记录序号；`tracks` 返回的歌曲 `id` 可逐首交给 `playurl.py`。`mine`、`liked` 和 `recent` 读取同目录 Cookie；完整 Cookie 被辅助字段拖累时自动退回仅携带 `sessionid`。`liked` 会自动映射到账号真实的“我喜欢的音乐”歌单。
 
 ## 播放限制
 
@@ -132,7 +132,9 @@ ENABLE_FLAC = False
 
 汽水没有命令行音质档。默认排除 FLAC 和可能解密为 FLAC 的加密流，然后在可用 M4A/MP3 中按码率从高到低选择；最高码率不可用或受会员限制时，会选择响应中下一条允许的 M4A/MP3。改为 `True` 后，FLAC 和加密无损流也恢复进码率排序。
 
-非会员可完整播放的歌曲可以不放 Cookie，脚本会从目标歌曲公开详情直接选取最高可用码率。同目录 `cookie` 中的登录字段用于尝试 PC 账号接口和个人歌单；脚本会发送完整 Cookie，不再裁成单个 `sessionid`。`/luna/pc/track_v2` 返回空正文时也会回退公开详情。解析严格限定在目标 `seo_track.track_player`，不会误取推荐歌曲。
+非会员可完整播放的歌曲可以不放 Cookie，脚本会从目标歌曲公开详情直接选取最高可用码率。同目录 `cookie` 中的登录字段用于尝试 PC 账号接口和个人歌单；脚本先发送完整 Cookie，失败时自动用核心 `sessionid` 重试，不把 `sid_guard` 的本地日期当作硬性到期日。`/luna/pc/track_v2` 返回空正文时也会回退公开详情。解析严格限定在目标 `seo_track.track_player`，不会误取推荐歌曲。
+
+`check.py` 返回 `valid_sessionid_only` 表示辅助 Cookie 已不可用、但服务端仍认可核心会话；这时不需要重新扫码。只有核心 `sessionid` 也被只读账号接口拒绝时才返回 `expired`。
 
 脚本不接受额外的客户端请求配置。PC 接口不可用时直接回退公开详情；公开详情中标记 `only_vip_playable` 或音质要求会员/购买时不会返回该地址，试听和推荐歌曲也不会冒充目标歌曲的完整流。
 

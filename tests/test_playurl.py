@@ -179,6 +179,33 @@ class PlayUrlTests(unittest.TestCase):
         headers = self.qishui.request_headers("sessionid=s; uid_tt=u")
         self.assertEqual(headers["Cookie"], "sessionid=s; uid_tt=u")
 
+    def test_qishui_playurl_falls_back_to_core_sessionid(self):
+        payload = {"status_code": 0, "track_player": {}}
+        with patch.object(
+            self.qishui,
+            "_fetch_track_with_cookie",
+            side_effect=[self.qishui.QishuiError("rejected"), payload],
+        ) as fetch:
+            result = self.qishui.fetch_track(
+                "123", "sessionid=s; sid_guard=expired; uid_tt=old", 3
+            )
+        self.assertEqual(result, payload)
+        self.assertEqual(fetch.call_args_list[0].args[1], "sessionid=s; sid_guard=expired; uid_tt=old")
+        self.assertEqual(fetch.call_args_list[1].args[1], "sessionid=s")
+
+    def test_qishui_playlist_falls_back_to_core_sessionid(self):
+        with patch.object(
+            self.qishui_playlist,
+            "get_json",
+            side_effect=[RuntimeError("rejected"), {"status_code": 0}],
+        ) as get_json:
+            result = self.qishui_playlist.authenticated_get_json(
+                "/luna/pc/me", {}, "sessionid=s; sid_guard=expired", 3
+            )
+        self.assertEqual(result, {"status_code": 0})
+        self.assertEqual(get_json.call_args_list[0].args[2], "sessionid=s; sid_guard=expired")
+        self.assertEqual(get_json.call_args_list[1].args[2], "sessionid=s")
+
     def test_qishui_aes_ctr_known_vector(self):
         key = bytes.fromhex("2b7e151628aed2a6abf7158809cf4f3c")
         iv = bytes.fromhex("f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff")

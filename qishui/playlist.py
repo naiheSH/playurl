@@ -25,9 +25,24 @@ def load_cookie():
     return "; ".join(line for line in lines if line and not line.startswith("#"))
 
 
+def parse_cookie(cookie):
+    values = {}
+    for part in str(cookie or "").split(";"):
+        if "=" in part:
+            key, value = part.split("=", 1)
+            if key.strip():
+                values[key.strip()] = value.strip()
+    return values
+
+
+def core_session_cookie(cookie):
+    values = parse_cookie(cookie)
+    token = values.get("sessionid") or values.get("sessionid_ss") or values.get("sid_tt") or ""
+    return "sessionid=" + token if token else ""
+
+
 def logged_in(cookie):
-    names = {part.split("=", 1)[0].strip() for part in cookie.split(";") if "=" in part}
-    return bool(names & {"sessionid", "sessionid_ss", "sid_guard", "sid_tt", "uid_tt", "uid_tt_ss"})
+    return bool(core_session_cookie(cookie))
 
 
 def pc_params(extra=None):
@@ -75,6 +90,17 @@ def get_json(path, params, cookie, timeout=12, user_agent=UA):
     if code not in (0, "0", None):
         raise RuntimeError("qishui playlist returned error %s" % code)
     return payload
+
+
+def authenticated_get_json(path, params, cookie, timeout=12, user_agent=UA):
+    """Use the full jar first, then retry with the long-lived sessionid only."""
+    core = core_session_cookie(cookie)
+    try:
+        return get_json(path, params, cookie, timeout, user_agent)
+    except RuntimeError:
+        if not core or core == cookie:
+            raise
+        return get_json(path, params, core, timeout, user_agent)
 
 
 def first_url(value):
@@ -169,13 +195,25 @@ def require_session():
 
 
 def created_playlists(cookie, timeout):
-    me = get_json("/luna/pc/me", {}, cookie, timeout)
+    core = core_session_cookie(cookie)
+    active_cookie = cookie
+    try:
+        me = get_json("/luna/pc/me", {}, active_cookie, timeout)
+    except RuntimeError:
+        if not core or core == active_cookie:
+            raise
+        active_cookie = core
+        me = get_json("/luna/pc/me", {}, active_cookie, timeout)
     user_id = str((me.get("my_info") or {}).get("id") or "")
+    if not user_id and core and core != active_cookie:
+        active_cookie = core
+        me = get_json("/luna/pc/me", {}, active_cookie, timeout)
+        user_id = str((me.get("my_info") or {}).get("id") or "")
     if not user_id:
         raise RuntimeError("qishui account did not return a user id")
-    return get_json("/luna/pc/user/playlist", {
+    return authenticated_get_json("/luna/pc/user/playlist", {
         "user_id": user_id, "cursor": "", "count": 100,
-    }, cookie, timeout).get("playlists") or []
+    }, active_cookie, timeout).get("playlists") or []
 
 
 def is_primary_liked_playlist(item):
@@ -260,7 +298,12 @@ def virtual_tracks(playlist_id, limit, offset, cookie, timeout):
     total = 0
     seen_cursors = set()
     while len(all_rows) < wanted:
-        payload = get_json(path, {"cursor": cursor, "count": min(100, max(1, wanted - len(all_rows)))}, cookie, timeout)
+        payload = authenticated_get_json(
+            path,
+            {"cursor": cursor, "count": min(100, max(1, wanted - len(all_rows)))},
+            cookie,
+            timeout,
+        )
         page = extract_tracks(payload)
         known = {row["id"] for row in all_rows}
         all_rows.extend(row for row in page if row["id"] not in known)
@@ -303,7 +346,7 @@ def tracks(playlist_id, limit=50, offset=0, timeout=12):
             if cookie or not logged_in(login_cookie):
                 raise
             cookie = login_cookie
-            payload = get_json("/luna/pc/playlist/detail", params, cookie, timeout)
+            payload = authenticated_get_json("/luna/pc/playlist/detail", params, cookie, timeout)
         meta = payload.get("playlist") if isinstance(payload.get("playlist"), dict) else meta
         page = extract_tracks(payload.get("media_resources") or [])
         known = {row["id"] for row in all_rows}

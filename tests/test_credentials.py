@@ -85,6 +85,27 @@ class CredentialChecks(unittest.TestCase):
             body, code = module.check(opener=lambda *_args, **_kwargs: Response({"status_code": 0, "my_info": {}}))
             self.assertEqual((body["status"], code), ("expired", 1))
 
+    def test_qishui_falls_back_to_core_sessionid(self):
+        module = load("qishui")
+        cookies = []
+
+        def opener(request, **_kwargs):
+            cookie = request.get_header("Cookie")
+            cookies.append(cookie)
+            if cookie == "sessionid=test":
+                return Response({"status_code": 0, "my_info": {"id": "1"}})
+            return Response({"status_code": 0, "my_info": {}})
+
+        with local_files(module, {"cookie": "sessionid=test; sid_guard=expired; uid_tt=old"}):
+            body, code = module.check(opener=opener)
+        self.assertEqual(cookies, [
+            "sessionid=test; sid_guard=expired; uid_tt=old",
+            "sessionid=test",
+        ])
+        self.assertEqual((body["status"], body["sessionMode"], code), (
+            "valid_sessionid_only", "sessionid", 0,
+        ))
+
     def test_spotify_client_credentials(self):
         module = load("spotify")
         with patch.dict(os.environ, {"SPOTIFY_CLIENT_ID": "", "SPOTIFY_CLIENT_SECRET": "", "SPOTIFY_ACCESS_TOKEN": ""}, clear=False):

@@ -15,7 +15,7 @@ python3 youtube/check.py
 
 六个检查脚本完全独立，只读取自身目录的凭据，不调用根目录或其他平台脚本。网易云、QQ、酷狗和汽水会访问各自的只读账号接口，不能只根据字段存在就判定登录有效。Spotify 检查用户 access token 或 Client Credentials；YouTube 有 `cookies.txt` 时检查网页登录状态，有 PO Token 时用测试视频验证解析。所有输出都会过滤凭据值。
 
-统一退出码：`0` 表示有效或该平台公开功能无需凭据，`1` 表示缺失、格式错误或已过期，`2` 表示网络/平台异常导致无法确认。JSON 的 `status` 会进一步区分 `valid`、`missing`、`invalid`、`expired`、`unknown` 和 `not_configured`。
+统一退出码：`0` 表示有效或该平台公开功能无需凭据，`1` 表示缺失、格式错误或已过期，`2` 表示网络/平台异常导致无法确认。JSON 的 `status` 会进一步区分 `valid`、`valid_sessionid_only`、`missing`、`invalid`、`expired`、`unknown` 和 `not_configured`。
 
 ## 存放位置
 
@@ -39,7 +39,7 @@ python3 youtube/check.py
 | QQ | `uin` 加 `qm_keyst`、`qqmusic_key`、`music_key` 之一 | QQ 登录播放和自建歌单 |
 | QQ 微信登录 | `wxuin` 加 `wxskey` | 同上 |
 | 酷狗 | `userid` 和 `token`，建议同时有 `kg_mid`、`kg_dfid` | `mine`、云歌单和会员播放 |
-| 汽水 | `sessionid`、`sessionid_ss`、`sid_guard`、`sid_tt`、`uid_tt`、`uid_tt_ss` 之一 | 个人歌单和会员播放 |
+| 汽水 | 核心为 `sessionid`；也兼容从 `sessionid_ss` 或 `sid_tt` 恢复核心值 | 个人歌单和登录播放 |
 | Spotify 元数据 | `client_id`、`client_secret` | 搜索和公开歌单元数据 |
 | Spotify 用户数据 | `access_token` | `mine` 和歌单曲目 |
 | YouTube | 通常不需要 | 受限视频才使用 Netscape cookie 或 PO token |
@@ -58,6 +58,8 @@ Spotify `credentials` 是 JSON 对象，可含 `client_id`、`client_secret`、`
 - YouTube 的普通公开视频和歌单。
 
 `mine`、虚拟歌单、酷狗云歌单和会员曲播放才读取凭据。公开接口失败后，汽水歌单脚本只在本地 cookie 已具备登录字段时才重试。
+
+汽水先使用完整 Cookie；如果辅助字段导致请求失败，会自动退回仅携带核心 `sessionid`。`sid_guard` 中的日期不是硬性失效依据，是否过期以只读账号接口能否识别 `sessionid` 为准。
 
 ## 登录入口
 

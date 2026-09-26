@@ -63,8 +63,13 @@ def load_cookie():
 
 
 def logged_in(cookie):
-    keys = set(parse_cookie(cookie))
-    return bool(keys & {"sessionid", "sessionid_ss", "sid_guard", "sid_tt", "uid_tt", "uid_tt_ss"})
+    return bool(core_session_cookie(cookie))
+
+
+def core_session_cookie(cookie):
+    values = parse_cookie(cookie)
+    token = values.get("sessionid") or values.get("sessionid_ss") or values.get("sid_tt") or ""
+    return "sessionid=" + token if token else ""
 
 
 def session_cookie(cookie):
@@ -116,6 +121,21 @@ def request_json(method, params, cookie, body=None, timeout=12, url=""):
         raise QishuiError("汽水接口返回了无效 JSON。") from exc
     if not isinstance(payload, dict):
         raise QishuiError("汽水接口返回了非对象 JSON。")
+    return payload
+
+
+def request_json_with_session_fallback(method, params, cookie, body=None, timeout=12, url=""):
+    """Retry a rejected full cookie jar with its core sessionid only."""
+    core = core_session_cookie(cookie)
+    try:
+        payload = request_json(method, params, cookie, body, timeout, url)
+    except (HTTPError, URLError, OSError, ValueError, QishuiError):
+        if not core or core == cookie:
+            raise
+        return request_json(method, params, core, body, timeout, url)
+    code = payload.get("status_code", payload.get("error_code", 0))
+    if code not in (0, "0", None) and core and core != cookie:
+        return request_json(method, params, core, body, timeout, url)
     return payload
 
 
@@ -213,7 +233,7 @@ def find_values(node, keys, found=None):
     return found
 
 
-def fetch_track(track_id, cookie, timeout):
+def _fetch_track_with_cookie(track_id, cookie, timeout):
     body = {
         "track_id": track_id,
         "media_type": "track",
@@ -232,6 +252,20 @@ def fetch_track(track_id, cookie, timeout):
             if isinstance(get_error, QishuiError):
                 raise get_error
             raise QishuiError("汽水播放信息请求失败：%s" % get_error) from post_error
+
+
+def fetch_track(track_id, cookie, timeout):
+    core = core_session_cookie(cookie)
+    try:
+        payload = _fetch_track_with_cookie(track_id, cookie, timeout)
+    except (HTTPError, URLError, OSError, ValueError, QishuiError):
+        if not core or core == cookie:
+            raise
+        return _fetch_track_with_cookie(track_id, core, timeout)
+    code = payload.get("status_code", payload.get("error_code", 0))
+    if code not in (0, "0", None) and core and core != cookie:
+        return _fetch_track_with_cookie(track_id, core, timeout)
+    return payload
 
 
 def fetch_public_track(track_id, timeout=12):
@@ -364,7 +398,9 @@ def resolve(track_id, timeout=12):
         if not isinstance(player_url, str) or not player_url.startswith("http"):
             continue
         try:
-            player = request_json("GET", {}, cookie, timeout=timeout, url=player_url)
+            player = request_json_with_session_fallback(
+                "GET", {}, cookie, timeout=timeout, url=player_url
+            )
             walk_streams(player, streams)
         except (HTTPError, URLError, OSError, ValueError, QishuiError):
             continue

@@ -80,7 +80,8 @@ python3 playurl/qishui/playurl.py <track_id> --decrypt output.m4a
 - `encrypted: true` 或 URL 带 `#auth=`：不能直接播放。只有用户明确要求时使用 `--decrypt`。解密输出 JSON，最终路径看 `decryptedFile`。
 - `vip_required`：会员曲。不要改用试听、推荐或分享页地址冒充完整版本。
 - `login_required`：公开详情没有非会员完整流。先纯 HTTP 登录，不要换 track_id。
-- 本地已有会话字段但个人歌单或登录接口失败：先运行 `check.py`；只有 `expired` 才重新登录，`unknown` 不等于过期。
+- 本地已有会话字段但个人歌单或登录接口失败：先运行 `check.py`。`valid_sessionid_only` 表示辅助字段失效但核心会话仍可复用；只有 `expired` 才重新登录，`unknown` 不等于过期。
+- 登录请求先使用完整 Cookie，被拒绝时只用核心 `sessionid` 重试。不要根据 `sid_guard` 的本地日期提前判定登录失效，也不要伪造有效期。
 - `track_v2` 空响应：脚本会回退目标歌曲公开详情；仍无完整流时停止。
 - `url_unavailable` 或 `source_unavailable`：停止并报告 `restriction.message`。
 
