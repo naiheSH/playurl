@@ -7,6 +7,7 @@
 - `search.py`：公开搜歌。不读 cookie。
 - `playlist.py`：读取登录账号的歌单、我的喜欢、最近播放和歌单曲目。
 - `playurl.py`：用 `track_id` 请求播放地址，并可解密带 `#auth=` 的音频。
+- `runtime.py`：Agent Runtime 的 JSON stdin/stdout 入口，可选 `decryptOutput`。
 - `auth.py`：可复用的 Python 登录 API，纯 HTTP 创建/轮询二维码、处理短信二次验证和保存 Cookie；只使用标准库。
 - `login.py`：`auth.py` 的命令行封装，默认不打开浏览器；`--browser` 是显式兜底。
 - `check.py`：请求只读账号接口；完整 Cookie 失败时用核心 `sessionid` 复检。
@@ -28,6 +29,8 @@ python3 playurl/qishui/playlist.py mine [limit] [offset]
 python3 playurl/qishui/playlist.py tracks <歌单 id|liked|recent> [limit] [offset]
 python3 playurl/qishui/playurl.py <track_id> [--decrypt output.m4a] [--json]
 ```
+
+Agent Runtime 示例：`{"action":"playurl","id":"track_id"}` 通过 stdin 传给 `python3 playurl/qishui/runtime.py`；需要落地解密时增加 `"decryptOutput":"output.m4a"`。stdout 始终是 JSON；协议见 [`../doc/runtime.md`](../doc/runtime.md)。旧命令行输出不变。
 
 ## 推荐：无浏览器 Python 登录
 

@@ -4,6 +4,8 @@
 
 各平台命令细节在对应目录的 `README.md`。给代理用的流程在同目录 `SKILL.md`。跨平台接口、输出、凭据和播放说明在 `doc/`。
 
+需要 Agent Runtime / Code 工具调用时，使用每个平台同目录的 `runtime.py`：它从 stdin 读取一个 JSON 对象，并只向 stdout 返回一个 JSON 对象。完整协议见 [`doc/runtime.md`](doc/runtime.md)。传统 `playurl.py` 不受影响，成功时仍默认只输出一行 URL。
+
 ## 运行环境
 
 支持 Python 3.10 或更高版本。核心搜索、歌单、播放和凭据检查脚本使用跨平台标准库写法，可在 Windows 10/11、现代 Linux 和 macOS 上通过 `python` 运行；Unix 终端也可使用 `python3`，Windows 可使用 `py -3.10`。

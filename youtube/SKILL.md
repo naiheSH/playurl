@@ -7,6 +7,8 @@ description: 用 playurl/youtube 的 yt-dlp 包装脚本搜索 YouTube 音频和
 
 只使用 `playurl/youtube/` 中的独立脚本和当前版本 `yt-dlp`。需要 Python 3.10+；Windows 可用 `py -3.10` 或虚拟环境中的 `python`。不要把 YouTube 冒充 Spotify，也不要把 Spotify 失败改到这里自动补播。不要长期缓存播放 URL。
 
+在要求 JSON stdin/stdout 的 Agent Runtime / Code 环境中，调用 `runtime.py`，输入一个含 `action` 的 JSON 对象并解析唯一的 stdout JSON。可用 action：`search`、`playlist_search`、`playlist_tracks`、`playurl`、`check`，没有 `playlist_mine`。不要在 Runtime 中调用 argv CLI；`ok: true` 后仍要检查 `data.playable`、`data.restriction` 和结果数组。
+
 ## 路由
 
 | 用户要的 | 命令 | 不要用 |

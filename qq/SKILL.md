@@ -7,6 +7,8 @@ description: 用 playurl/qq 的独立标准库脚本搜索 QQ 音乐歌曲和歌
 
 只用 `playurl/qq/` 里的独立脚本。需要 Python 3.10+。搜索、歌单和播放只使用 Python 标准库；登录使用同目录 `requirements.txt` 的手机客户端协议库，终端绘制另用可选的 `requirements-terminal.txt`。缺少终端组件时继续使用 `127.0.0.1` 二维码页，不要判定登录失败。不要导入仓库其他代码，不要请求常驻本地服务，不要把歌名当成 songmid。
 
+在要求 JSON stdin/stdout 的 Agent Runtime / Code 环境中，调用 `runtime.py`，输入一个含 `action` 的 JSON 对象并解析唯一的 stdout JSON。可用 action：`search`、`playlist_search`、`playlist_tracks`、`playlist_mine`、`playurl`、`check`。播放输入可带 `mediaMid`。不要在 Runtime 中调用 argv CLI；`ok: true` 后仍要检查业务字段。
+
 ## 按用户原话选脚本
 
 | 用户要的 | 用这个 | 不要用 |

@@ -6,6 +6,8 @@
 
 ## 命令
 
+`runtime.py` 是 Agent Runtime 的 JSON stdin/stdout 入口，与下面的传统 argv 命令并存。
+
 ```text
 python3 playurl/youtube/search.py <歌名|歌名 歌手> [limit] [offset]
 python3 playurl/youtube/playlist.py search <关键词> [limit] [offset]
@@ -13,6 +15,8 @@ python3 playurl/youtube/playlist.py tracks <playlist_id|url> [limit] [offset]
 python3 playurl/youtube/playurl.py <video_id|url> [high|standard] [--json]
 python3 playurl/youtube/check.py
 ```
+
+Agent Runtime 示例：`{"action":"playurl","id":"video_id或URL","quality":"high"}` 通过 stdin 传给 `python3 playurl/youtube/runtime.py`。YouTube 不支持 `playlist_mine`；完整协议见 [`../doc/runtime.md`](../doc/runtime.md)。旧命令行输出不变。
 
 歌曲搜索结果和歌单曲目的 `id` 是 11 位 YouTube video ID，可直接交给 `playurl.py`。歌单搜索使用 YouTube 的 Playlist 类型筛选，只保留真实 playlist ID；已有播放列表 ID/URL 使用 `playlist.py tracks`。不模拟“我的歌单”。
 

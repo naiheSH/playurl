@@ -9,6 +9,7 @@
 - `search.py`：搜索歌曲元数据。
 - `playlist.py`：搜索公开歌单、列歌和读取当前用户歌单。
 - `playurl.py`：明确返回不可作为通用音频 URL 播放，同时提供 Spotify URI、网页和 Embed URL。
+- `runtime.py`：Agent Runtime 的 JSON stdin/stdout 入口。
 - `check.py`：验证用户 access token；没有用户 token 时验证 Client Credentials。
 - `credentials`：可选 OAuth 配置 JSON，已被 gitignore，不要提交。
 
@@ -22,6 +23,8 @@ python3 playurl/spotify/playlist.py mine [limit] [offset]
 python3 playurl/spotify/playurl.py <spotify_track_id> [--json]
 python3 playurl/spotify/check.py
 ```
+
+Agent Runtime 示例：`{"action":"playurl","id":"22位track id"}` 通过 stdin 传给 `python3 playurl/spotify/runtime.py`。`provider_limited` 是成功取得的业务结果，因此 Runtime 返回 `ok: true`、退出码 0；协议见 [`../doc/runtime.md`](../doc/runtime.md)。旧 `playurl.py` 的退出码和输出不变。
 
 ## OAuth 配置
 

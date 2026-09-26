@@ -7,6 +7,8 @@ description: 用 playurl/spotify 的独立标准库脚本查询 Spotify 歌曲�
 
 只使用 `playurl/spotify/` 内的脚本和官方 Spotify API。需要 Python 3.10+；Windows 可用 `py -3.10` 或虚拟环境中的 `python`。不要调用下载器、网页抓流、YouTube 或其他平台补一首“同名可播”。
 
+在要求 JSON stdin/stdout 的 Agent Runtime / Code 环境中，调用 `runtime.py`，输入一个含 `action` 的 JSON 对象并解析唯一的 stdout JSON。可用 action：`search`、`playlist_search`、`playlist_tracks`、`playlist_mine`、`playurl`、`check`。Spotify `playurl` 的 `provider_limited` 会作为 `ok: true` 的业务结果返回，仍必须检查 `data.playable`，不能把退出码 0 解释为存在音频直链。
+
 ## 路由
 
 | 用户要的 | 使用 | 不要用 |

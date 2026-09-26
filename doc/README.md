@@ -8,6 +8,7 @@
 | [output.md](output.md) | 搜索、歌单和播放 JSON 的稳定字段 |
 | [credentials.md](credentials.md) | 凭据放在哪里、哪些字段必须存在、哪些文件不能提交 |
 | [playback.md](playback.md) | 各平台音质字段、降级、播放失败类别、重试和缓存边界 |
+| [runtime.md](runtime.md) | Agent Runtime 的 JSON stdin/stdout 协议、actions、退出码和示例 |
 
 不另建文件的内容：
 

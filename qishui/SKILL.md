@@ -7,6 +7,8 @@ description: 用 playurl/qishui 的独立脚本登录汽水音乐、搜索歌曲
 
 只使用 `playurl/qishui/` 内的独立实现，不请求常驻本地服务。需要 Python 3.10+；无依赖 Node 单文件需要 Node.js 18+。Windows 可用 `py -3.10` 或激活虚拟环境后的 `python` 代替示例中的 `python3`。
 
+在要求 JSON stdin/stdout 的 Agent Runtime / Code 环境中，调用 `runtime.py`，输入一个含 `action` 的 JSON 对象并解析唯一的 stdout JSON。可用 action：`search`、`playlist_search`、`playlist_tracks`、`playlist_mine`、`playurl`、`check`；播放可带 `decryptOutput`。登录和短信验证仍走有状态的 `auth.py` / `login.py`，不塞进单次 Runtime 请求。`ok: true` 后仍要检查 `data.playable`、`data.encrypted` 和 `data.restriction`。
+
 ## 路由
 
 | 用户需求 | 文件或命令 |

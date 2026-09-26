@@ -7,6 +7,7 @@
 - `search.py`：公开搜歌。不读 cookie。
 - `playlist.py`：公开搜歌单、按曲目偏移列歌、读取已登录账号的歌单。
 - `playurl.py`：用 songmid 换短期播放地址。
+- `runtime.py`：Agent Runtime 的 JSON stdin/stdout 入口。
 - `login.py`：模拟 QQ 音乐手机客户端，打开本机浏览器二维码页并写入 cookie。
 - `check.py`：请求“我的喜欢”只读接口，判断 Cookie 是否真实有效或已过期。
 - `requirements.txt`：`login.py` 使用的 QQ 音乐客户端协议库。
@@ -35,6 +36,8 @@ python3 playurl/qq/playlist.py tracks <歌单 id> [limit] [offset]
 python3 playurl/qq/playlist.py mine [limit] [offset]
 python3 playurl/qq/playurl.py <songmid> [quality] [media_mid] [--json]
 ```
+
+Agent Runtime 示例：`{"action":"playurl","id":"songmid","quality":"exhigh","mediaMid":"可选"}` 通过 stdin 传给 `python3 playurl/qq/runtime.py`。stdout 始终是 JSON；协议见 [`../doc/runtime.md`](../doc/runtime.md)。旧命令行输出不变。
 
 需要 Python 3.10+。`login.py` 使用的是 QQ 音乐 App 自己的二维码协议：请用手机 QQ 音乐 App 扫码，不需要打开 QQ 或微信。脚本始终提供并默认打开只监听 `127.0.0.1` 的二维码页面；安装可选的 `requirements-terminal.txt` 后还会直接在终端绘制二维码。缺少终端组件不会中断登录。传 `--no-open` 可关闭自动打开浏览器。登录成功后原子写入同目录 `cookie`；macOS/Linux 权限设为 `0600`，不会在终端或页面状态接口返回 token。
 

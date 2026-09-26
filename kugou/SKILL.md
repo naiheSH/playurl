@@ -7,6 +7,8 @@ description: 用 playurl/kugou 的独立脚本搜索酷狗歌曲和歌单，并�
 
 只用 `playurl/kugou/` 里的独立脚本。需要 Python 3.10+。不要导入本目录外代码，不要请求常驻本地服务，不要把歌名当成 hash。登录和首次设备注册需要同目录 `requirements.txt`；终端二维码使用可选的 `requirements-terminal.txt`，缺少时继续使用 PNG 和 `127.0.0.1` 页面。
 
+在要求 JSON stdin/stdout 的 Agent Runtime / Code 环境中，调用 `runtime.py`，输入一个含 `action` 的 JSON 对象并解析唯一的 stdout JSON。可用 action：`search`、`playlist_search`、`playlist_tracks`、`playlist_mine`、`playurl`、`check`。播放时保留 `albumId` 和 `albumAudioId`。不要在 Runtime 中调用 argv CLI；`ok: true` 后仍要检查 `data.playable` 和 `data.restriction`。
+
 ## 按用户原话选脚本
 
 | 用户要的 | 用这个 | 不要用 |

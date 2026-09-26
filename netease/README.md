@@ -7,6 +7,7 @@
 - `search.py`：公开搜歌。不读 cookie。
 - `playlist.py`：公开搜歌单、按曲目偏移列歌、读取已登录账号的歌单。
 - `playurl.py`：用歌曲数字 ID 换短期播放地址。
+- `runtime.py`：Agent Runtime 的 JSON stdin/stdout 入口。
 - `login.py`：打开本机浏览器二维码页，用网易云音乐 App 扫码后写入 cookie。
 - `check.py`：请求只读账号接口，判断 `MUSIC_U` 是否真实有效或已过期。
 - `requirements.txt`：`login.py` 生成二维码 PNG 所需的跨平台依赖。
@@ -35,6 +36,8 @@ python3 playurl/netease/playlist.py tracks <歌单 id> [limit] [offset]
 python3 playurl/netease/playlist.py mine [limit] [offset]
 python3 playurl/netease/playurl.py <歌曲数字 id> [quality] [--json]
 ```
+
+Agent Runtime 示例：`{"action":"playurl","id":"347230","quality":"exhigh"}` 通过 stdin 传给 `python3 playurl/netease/runtime.py`。stdout 始终是 `{"ok":...,"data":...}` 或结构化错误；协议见 [`../doc/runtime.md`](../doc/runtime.md)。旧命令行输出不变。
 
 需要 Python 3.10+。`login.py` 始终提供并默认打开只监听 `127.0.0.1` 的二维码页面；安装可选的 `requirements-terminal.txt` 后还会直接在终端绘制二维码。缺少终端组件不会中断登录。传 `--no-open` 可关闭自动打开浏览器。登录成功后原子写入同目录 `cookie`；macOS/Linux 权限设为 `0600`，终端和页面状态接口都不会返回凭据。
 

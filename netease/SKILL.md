@@ -7,6 +7,8 @@ description: 用 playurl/netease 的独立标准库脚本搜索网易云歌曲�
 
 只用 `playurl/netease/` 里的独立脚本。需要 Python 3.10+。搜索、歌单和播放只使用 Python 标准库；登录二维码生成依赖同目录 `requirements.txt`，终端绘制另用可选的 `requirements-terminal.txt`。缺少终端组件时继续使用 `127.0.0.1` 二维码页，不要判定登录失败。不要导入仓库其他代码，不要请求 `127.0.0.1:3000`，不要把歌名当成歌曲 ID。
 
+在要求 JSON stdin/stdout 的 Agent Runtime / Code 环境中，调用 `runtime.py`，输入一个含 `action` 的 JSON 对象并解析唯一的 stdout JSON。可用 action：`search`、`playlist_search`、`playlist_tracks`、`playlist_mine`、`playurl`、`check`。不要在 Runtime 中调用 argv CLI，也不要把 `playurl.py` 的纯 URL 当成 JSON。`ok: true` 只表示调用完成，仍要检查 `data.playable`、`data.status` 和结果数组。
+
 ## 按用户原话选脚本
 
 | 用户要的 | 用这个 | 不要用 |

@@ -7,6 +7,7 @@
 - `search.py`：公开搜歌。不读 cookie。
 - `playlist.py`：公开搜歌单、按曲目偏移列歌、读取已登录账号的歌单。
 - `playurl.py`：用文件 hash 换短期播放地址。
+- `runtime.py`：Agent Runtime 的 JSON stdin/stdout 入口。
 - `login.py`：保存并展示二维码，用酷狗音乐 App 扫码后写入 cookie；终端二维码依赖缺失时仍可正常登录。
 - `check.py`：请求只读个人歌单接口，识别有效 Token 和 `20017` 过期状态。
 - `device.py`：注册酷狗设备并获取播放接口要求的 `dfid`。
@@ -36,6 +37,8 @@ python3 playurl/kugou/playlist.py tracks <specialid 或 collection_id> [limit] [
 python3 playurl/kugou/playlist.py mine [limit] [offset]
 python3 playurl/kugou/playurl.py <hash> [quality] [album_id] [album_audio_id] [--json]
 ```
+
+Agent Runtime 示例：`{"action":"playurl","id":"hash","albumId":"...","albumAudioId":123}` 通过 stdin 传给 `python3 playurl/kugou/runtime.py`。stdout 始终是 JSON；协议见 [`../doc/runtime.md`](../doc/runtime.md)。旧命令行输出不变。
 
 需要 Python 3.10+。`login.py` 会把官方二维码保存为同目录 `login-qr.png`，并打印、默认打开只监听 `127.0.0.1` 的备用浏览器页面。安装可选的 `requirements-terminal.txt` 后还会在终端绘制二维码；没有安装只跳过终端绘制，不会让本地页面退出。传 `--no-open` 可关闭自动打开浏览器，`--keep-qr` 可在流程结束后保留图片。扫码成功后还会注册播放接口要求的设备 `dfid`，再原子写入同目录 `cookie`；macOS/Linux 权限设为 `0600`。旧 cookie 没有有效 `dfid` 时，`playurl.py` 会在已安装依赖的虚拟环境中自动注册一次并安全更新 cookie。终端和浏览器状态接口都不会返回凭据。
 
