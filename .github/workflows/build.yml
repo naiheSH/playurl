@@ -1,6 +1,6 @@
 name: build
 
-# 每个国内平台单独打 zip。CI 各上传一个 artifact，打 tag 时发布四个 zip。不含根 doc。
+# 每个国内平台单独打 zip。脚本放进 scripts/，说明文件留在包根目录。CI 各上传一个 artifact，打 tag 时发布四个 zip。不含根 doc。
 
 on:
   workflow_dispatch:
@@ -65,11 +65,15 @@ jobs:
           else
             version="${GITHUB_SHA::7}"
           fi
-          mkdir -p dist
-          archive="dist/${platform}-${version}.zip"
-          git archive --format=zip --prefix="${platform}/" -o "$archive" "HEAD:${platform}"
+          stage="$(mktemp -d)"
+          mkdir -p "$stage/scripts" dist
+          git archive --format=tar "HEAD:${platform}" | tar -x -C "$stage/scripts"
+          find "$stage/scripts" -maxdepth 1 -type f ! -name '*.py' ! -name '*.cjs' -exec mv {} "$stage/" \;
+          archive="$PWD/dist/${platform}-${version}.zip"
+          (cd "$stage" && zip -qr "$archive" .)
+          rm -rf "$stage"
           unzip -Z1 "$archive" > "dist/${platform}.txt"
-          awk -F/ -v platform="$platform" '
+          awk -F/ '
             {
               for (i = 1; i <= NF; i++) {
                 if ($i == "cookie" || $i == "token" || $i == "credentials" || $i == "credentials.json" || $i == "cookies.txt" || $i == "tests" || $i == "doc" || $i == "spotify" || $i == "youtube" || $i == "__pycache__" || $i == ".venv") {
@@ -77,11 +81,13 @@ jobs:
                   exit 1
                 }
               }
-              if ($1 != platform && $1 != platform "/") exit 1
+              if ($1 != "scripts" && $1 != "SKILL.md" && $1 != "README.md" && $1 != "requirements.txt" && $1 != "requirements-terminal.txt" && $1 != "THIRD_PARTY_NOTICES.md" && $1 != "LICENSE.ly-music-source") exit 1
             }
           ' "dist/${platform}.txt"
-          grep -Fxq "${platform}/playurl.py" "dist/${platform}.txt"
-          grep -Fxq "${platform}/README.md" "dist/${platform}.txt"
+          grep -Fxq "scripts/playurl.py" "dist/${platform}.txt"
+          grep -Fxq "scripts/search.py" "dist/${platform}.txt"
+          grep -Fxq "SKILL.md" "dist/${platform}.txt"
+          grep -Fxq "README.md" "dist/${platform}.txt"
           unzip -Z1 "$archive"
 
       - name: Upload package
@@ -109,7 +115,11 @@ jobs:
         run: |
           set -euo pipefail
           test "$(find dist -name '*.zip' | wc -l)" -eq 4
-          gh release create "$GITHUB_REF_NAME" dist/*.zip \
-            --title "$GITHUB_REF_NAME" \
-            --generate-notes \
-            --verify-tag
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/*.zip --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" dist/*.zip \
+              --title "$GITHUB_REF_NAME" \
+              --generate-notes \
+              --verify-tag
+          fi
