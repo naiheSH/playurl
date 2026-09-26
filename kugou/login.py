@@ -20,6 +20,7 @@ from urllib.request import Request, urlopen
 
 HERE = Path(__file__).resolve().parent
 COOKIE_FILE = HERE / "cookie"
+QR_FILE = HERE / "login-qr.png"
 BASE = "https://login-user.kugou.com"
 WEB_SALT = "NVPh5oo715z5DIWAeQlhMDsWXXQV4hwt"
 state = {"status": "正在创建酷狗二维码…", "done": False, "error": False}
@@ -81,9 +82,10 @@ def save_cookie(userid, token, mid, dev, dfid="-", guid=""):
 def show_terminal_qr(image):
     try:
         from terminal_qrcode import draw
-        draw(image).print(end="\n")
-    except ImportError as exc:
-        raise RuntimeError("缺少终端二维码依赖，请先运行：python3 -m pip install -r requirements.txt") from exc
+    except ImportError:
+        return False
+    draw(image).print(end="\n")
+    return True
 
 
 def register_device(userid, token, mid, guid):
@@ -126,6 +128,8 @@ def main():
     parser = argparse.ArgumentParser(description="酷狗音乐独立扫码登录")
     parser.add_argument("--no-open", action="store_true", help="不自动打开浏览器")
     parser.add_argument("--timeout", type=int, default=180, help="等待秒数，默认 180")
+    parser.add_argument("--qr-file", default=str(QR_FILE), help="二维码 PNG 保存路径")
+    parser.add_argument("--keep-qr", action="store_true", help="流程结束后保留二维码图片")
     args = parser.parse_args()
     guid = md5(str(uuid.uuid4()))
     mid = str(int(md5(guid), 16))
@@ -147,11 +151,17 @@ def main():
     if not key or "," not in image_uri:
         raise RuntimeError("酷狗没有返回有效二维码")
     qr_image = base64.b64decode(image_uri.split(",", 1)[1])
+    qr_path = Path(args.qr_file).expanduser().resolve()
+    qr_path.parent.mkdir(parents=True, exist_ok=True)
+    qr_path.write_bytes(qr_image)
+    os.chmod(qr_path, 0o600)
     server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     local_url = f"http://127.0.0.1:{server.server_port}/"
     print("请使用酷狗音乐 App 扫描下面的二维码：")
-    show_terminal_qr(qr_image)
+    if not show_terminal_qr(qr_image):
+        print("未安装可选的 terminal-qrcode，跳过终端绘制。")
+    print(f"二维码图片：{qr_path}")
     print("浏览器备用地址：")
     print(local_url)
     if not args.no_open:
@@ -191,6 +201,11 @@ def main():
     finally:
         server.shutdown()
         server.server_close()
+        if not args.keep_qr:
+            try:
+                qr_path.unlink()
+            except FileNotFoundError:
+                pass
 
 
 if __name__ == "__main__":

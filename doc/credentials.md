@@ -1,6 +1,21 @@
 # 凭据
 
-凭据只放在本机，不写入命令、日志、测试、JSON、文档或 Git 提交。检查登录时只报告字段是否存在，不打印值。`login.py` 用原子替换写文件，并把权限设为 `600`。
+凭据只放在本机，不写入命令、日志、测试、JSON、文档或 Git 提交。`login.py` 用原子替换写文件，并把权限设为 `600`。
+
+## 有效性检查
+
+```text
+python3 netease/check.py
+python3 qq/check.py
+python3 kugou/check.py
+python3 qishui/check.py
+python3 spotify/check.py
+python3 youtube/check.py
+```
+
+六个检查脚本完全独立，只读取自身目录的凭据，不调用根目录或其他平台脚本。网易云、QQ、酷狗和汽水会访问各自的只读账号接口，不能只根据字段存在就判定登录有效。Spotify 检查用户 access token 或 Client Credentials；YouTube 有 `cookies.txt` 时检查网页登录状态，有 PO Token 时用测试视频验证解析。所有输出都会过滤凭据值。
+
+统一退出码：`0` 表示有效或该平台公开功能无需凭据，`1` 表示缺失、格式错误或已过期，`2` 表示网络/平台异常导致无法确认。JSON 的 `status` 会进一步区分 `valid`、`missing`、`invalid`、`expired`、`unknown` 和 `not_configured`。
 
 ## 存放位置
 

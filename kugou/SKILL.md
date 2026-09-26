@@ -16,6 +16,7 @@ description: 用 playurl/kugou 的独立脚本搜索酷狗歌曲和歌单，并�
 | 已有 specialid，要里面的歌 | `playlist.py tracks` | `playurl.py` |
 | 我的歌单、默认收藏、我喜欢 | `playlist.py mine`，再用返回的 `collection_` ID 调 `tracks` | 把 `collection_` 当 specialid 搜索 |
 | 没有 token、要酷狗 App 扫码 | `login.py` | 手工打印 cookie |
+| 检查 token 是否过期 | `check.py` | 只看 userid/token 字段 |
 | 已有 hash，要播放地址 | `playurl.py` | 再搜一次 |
 
 歌曲 `id` 是 32 位文件 hash。公开歌单 ID 是数字 `specialid`。自己的歌单 ID 以 `collection_` 开头。三者不能互换。
@@ -26,6 +27,7 @@ description: 用 playurl/kugou 的独立脚本搜索酷狗歌曲和歌单，并�
 
 ```text
 python3 playurl/kugou/login.py
+python3 playurl/kugou/check.py
 python3 playurl/kugou/search.py "歌名"
 python3 playurl/kugou/search.py "歌名 歌手"
 python3 playurl/kugou/search.py "歌手 歌名" 10 0
@@ -93,6 +95,8 @@ playurl.py <hash> [quality] [album_id] [album_audio_id] [--json]
 搜歌和公开歌单不读 cookie。`mine`、`collection_` 歌单和登录播放才读同目录 `cookie`。
 
 cookie 需要 `KuGoo`，或 `userid` + `token`，以及 `kg_mid`、有效的 `dfid`/`kg_dfid`。只报告字段是否存在，不打印值。不要写入命令、日志、测试、JSON 或提交。文件权限应为 `600`。
+
+登录播放或个人歌单失败且字段齐全时，先运行 `check.py`。它会识别酷狗 `20017` 为 `expired`；此时重新扫码。`unknown` 是网络或平台异常，不要盲目换歌或更换 Cookie。
 
 缺少登录凭据时运行 `login.py`。它打印并打开随机的 `127.0.0.1` 页面，使用酷狗音乐 App 扫码确认后注册设备 `dfid`，再原子写入同目录 `cookie`。旧 cookie 缺少有效 `dfid` 时 `playurl.py` 会自动注册一次。临时页面不是播放服务。
 

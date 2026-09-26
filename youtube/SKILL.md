@@ -15,6 +15,7 @@ description: 用 playurl/youtube 的 yt-dlp 包装脚本搜索 YouTube 音频和
 | 搜公开播放列表 | `playlist.py search <关键词> [limit] [offset]` | 歌曲搜索结果冒充歌单 |
 | 读取已知播放列表 | `playlist.py tracks <playlist_id或url> [limit] [offset]` | 频道 URL |
 | 解析播放地址 | `playurl.py <video_id或url> [high或standard] [--json]` | 手工拼接 googlevideo 地址 |
+| 检查 cookies.txt / PO Token | `check.py` | 只检查文件存在 |
 | 我的歌单、稍后观看 | 不支持 | 不要编一个 `mine` 命令 |
 
 歌曲 ID 是 11 位 video ID。歌单 ID 是实际 playlist ID。频道 ID、handle 和 playlist ID 不能互换。`youtu.be`、`watch?v=` 和 `/shorts/` 可由脚本规范化，其他站点 URL 不要传进来。
@@ -29,6 +30,7 @@ python3 playurl/youtube/playlist.py search "歌单关键词" 10 0
 python3 playurl/youtube/playlist.py tracks <playlist_id或url> 50 0
 python3 playurl/youtube/playurl.py <video_id或url>
 python3 playurl/youtube/playurl.py <video_id或url> standard --json
+python3 playurl/youtube/check.py
 ```
 
 搜索和歌单依赖本机 `yt-dlp`。优先使用 PATH 中的命令，否则使用当前 Python 的 `yt_dlp` 模块。缺失时报告安装 `youtube/requirements.txt`，不要在脚本里复制 YouTube 解密逻辑。
@@ -63,6 +65,8 @@ QUALITY = "high"
 公开内容通常不需要登录。受限内容使用同目录、已 gitignore 的 Netscape `cookies.txt`。PO Token 逐行放入同目录 `token`；裸 token 会被当成 `mweb.gvs`。不要输出或提交 Cookie、Token，也不要把浏览器原始 `Cookie:` 请求头当成 Netscape 文件。
 
 解析失败且提示 challenge、PO Token 或 403 时，先更新 `yt-dlp`，再按当前官方要求更新 Token。不要在脚本中固化临时签名。
+
+配置过凭据时可运行 `check.py`：`cookies.txt` 检查网页是否识别登录，PO Token 用公开测试视频验证解析。`not_configured` 且 `publicUsable: true` 表示公开内容仍可用，不是登录有效。
 
 ## 不要做
 

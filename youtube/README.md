@@ -9,6 +9,7 @@ python3 playurl/youtube/search.py <歌名|歌名 歌手> [limit] [offset]
 python3 playurl/youtube/playlist.py search <关键词> [limit] [offset]
 python3 playurl/youtube/playlist.py tracks <playlist_id|url> [limit] [offset]
 python3 playurl/youtube/playurl.py <video_id|url> [high|standard] [--json]
+python3 playurl/youtube/check.py
 ```
 
 歌曲搜索结果和歌单曲目的 `id` 是 11 位 YouTube video ID，可直接交给 `playurl.py`。歌单搜索使用 YouTube 的 Playlist 类型筛选，只保留真实 playlist ID；已有播放列表 ID/URL 使用 `playlist.py tracks`。不模拟“我的歌单”。
@@ -39,6 +40,8 @@ playurl/youtube/cookies.txt
 ```
 
 不要放原始 `Cookie:` 请求头；`yt-dlp --cookies` 要求 Netscape Cookie 文件。该文件已被 gitignore，不应打印或提交。Cookie 不能替代 YouTube 当前可能要求的 PO Token；遇到 PO Token/403 时应更新 `yt-dlp` 并按其官方 Wiki 配置 provider，而不是把临时 Token 写进脚本。
+
+`check.py` 在存在 `cookies.txt` 时访问账号历史页确认网页是否识别登录；只有 PO Token 时用一个公开测试视频验证当前 `yt-dlp` 解析通路。未配置凭据时返回 `not_configured`，但 `publicUsable: true`，因为公开内容不要求登录。
 
 如果需要手工保存 PO Token，放在同目录、已 gitignore 的 `token` 文件。每行一个，空行和 `#` 注释会被忽略：
 

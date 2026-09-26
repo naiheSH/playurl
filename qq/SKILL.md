@@ -17,6 +17,7 @@ description: 用 playurl/qq 的独立标准库脚本搜索 QQ 音乐歌曲和歌
 | 我的歌单 | `playlist.py mine` | 公开搜索 |
 | 我的喜欢、红心、收藏的歌 | `playlist.py tracks liked` | 把 `liked` 当 disstid 搜索 |
 | 没有 qm_keyst、要 QQ 音乐 App 扫码 | `login.py` | QQ/微信网页登录二维码 |
+| 检查 Cookie 是否过期 | `check.py` | 只看 uin/key 字段 |
 | 已有 songmid，要播放地址 | `playurl.py` | 再搜一次 |
 
 歌曲 ID 是 `songmid`，形如 `002uJqIq4fgN2F`。歌单 ID 是 `disstid`，通常是数字字符串。`liked` 只是「我的喜欢」的虚拟 ID。三者不能互换。
@@ -28,6 +29,7 @@ description: 用 playurl/qq 的独立标准库脚本搜索 QQ 音乐歌曲和歌
 ```text
 python3 -m pip install -r playurl/qq/requirements.txt
 python3 playurl/qq/login.py
+python3 playurl/qq/check.py
 python3 playurl/qq/search.py "歌名"
 python3 playurl/qq/search.py "歌名 歌手"
 python3 playurl/qq/search.py "歌手 歌名" 10
@@ -97,6 +99,8 @@ python3 playurl/qq/playurl.py <songmid> exhigh <media_mid>
 ## 凭据
 
 搜歌和公开歌单不读 cookie。`mine`、`tracks liked` 和会员播放才读同目录 `cookie`。
+
+登录播放或个人数据失败且本地字段齐全时，先运行 `check.py`。`expired` 才重新登录；`unknown` 是网络或平台异常。
 
 QQ 登录 cookie 必须同时有 `uin`，以及 `qm_keyst`、`qqmusic_key`、`music_key` 三者之一；微信登录使用 `wxuin` 和 `wxskey`。检查时只报告字段是否存在，不打印值。不要写入命令、日志、测试、JSON 或提交。文件权限应为 `600`。
 

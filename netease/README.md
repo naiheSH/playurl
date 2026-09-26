@@ -8,6 +8,7 @@
 - `playlist.py`：公开搜歌单、按曲目偏移列歌、读取已登录账号的歌单。
 - `playurl.py`：用歌曲数字 ID 换短期播放地址。
 - `login.py`：打开本机浏览器二维码页，用网易云音乐 App 扫码后写入 cookie。
+- `check.py`：请求只读账号接口，判断 `MUSIC_U` 是否真实有效或已过期。
 - `requirements.txt`：仅 `login.py` 需要。
 - `cookie`：登录凭据。已被 gitignore，不要提交。
 
@@ -18,6 +19,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r playurl/netease/requirements.txt
 python playurl/netease/login.py
+python3 playurl/netease/check.py
 python3 playurl/netease/search.py <歌名|歌名 歌手|歌手 歌名> [limit] [offset]
 python3 playurl/netease/playlist.py search <关键词> [limit] [offset]
 python3 playurl/netease/playlist.py tracks <歌单 id> [limit] [offset]

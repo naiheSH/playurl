@@ -16,6 +16,7 @@ description: 用 playurl/netease 的独立标准库脚本搜索网易云歌曲�
 | 已有歌单数字 ID，要里面的歌 | `playlist.py tracks` | `playurl.py` |
 | 我的歌单、我喜欢的歌单 | `playlist.py mine` | 公开搜索 |
 | 没有 MUSIC_U、要扫码登录 | `login.py` | 手工打印 cookie |
+| 检查 MUSIC_U 是否过期 | `check.py` | 只看字段是否存在 |
 | 已有歌曲数字 ID，要播放地址 | `playurl.py` | 再搜一次 |
 
 歌曲 ID 是纯数字。歌单 ID 也是纯数字。二者不能互换。
@@ -27,6 +28,7 @@ description: 用 playurl/netease 的独立标准库脚本搜索网易云歌曲�
 ```text
 python3 -m pip install -r playurl/netease/requirements.txt
 python3 playurl/netease/login.py
+python3 playurl/netease/check.py
 python3 playurl/netease/search.py "歌名"
 python3 playurl/netease/search.py "歌名 歌手"
 python3 playurl/netease/search.py "歌手 歌名" 10 0
@@ -87,6 +89,8 @@ python3 playurl/netease/playurl.py <歌曲数字 id> standard
 ## 凭据
 
 搜歌和公开歌单不读 cookie。`mine` 和登录播放才读。
+
+登录播放或 `mine` 失败且本地已有 `MUSIC_U` 时，先运行 `check.py`。`expired` 才重新登录；`unknown` 是网络或平台异常，不能断言凭据过期。
 
 没有 `MUSIC_U` 时运行 `login.py`。它打印并打开随机的 `127.0.0.1` 页面，只用于展示二维码和状态；使用网易云音乐 App 扫码后原子写入同目录 `cookie`。这个临时页面不是播放服务。首次使用前安装同目录 `requirements.txt`；搜索、歌单和播放不需要它。
 

@@ -4,6 +4,19 @@
 
 各平台命令细节在对应目录的 `README.md`。给代理用的流程在同目录 `SKILL.md`。跨平台接口、输出、凭据和播放说明在 `doc/`。
 
+每个平台独立检查自己的凭据，不依赖根目录入口或其他平台脚本：
+
+```text
+python3 playurl/netease/check.py
+python3 playurl/qq/check.py
+python3 playurl/kugou/check.py
+python3 playurl/qishui/check.py
+python3 playurl/spotify/check.py
+python3 playurl/youtube/check.py
+```
+
+平台目录可单独复制使用。
+
 ## 目录
 
 | 目录 | 搜索 | 歌单 | 播放 | 歌曲 ID |
@@ -160,7 +173,7 @@ YouTube 是单独的音源，不冒充 Spotify。歌曲搜索、真实歌单搜�
 
 网易云、QQ、酷狗凭据以及汽水个人账号功能的凭据只放各自同目录 `cookie`。四个 `login.py` 都以原子替换写文件并设置权限 `600`。汽水公开搜索、公开歌单和非会员免费曲不要求 Cookie。Spotify 使用 OAuth 环境变量或 `credentials`，不读取网页登录 cookie。根 `.gitignore` 已忽略这些本机文件。
 
-不要把 cookie 或播放签名写入命令、日志、测试、文档或提交。检查登录时只报告字段是否存在，不打印值。
+不要把 cookie 或播放签名写入命令、日志、测试、文档或提交。各平台 `check.py` 会实际请求只读账号接口判断是否过期，但只输出状态，不打印值。退出码统一为 `0` 有效或无需凭据、`1` 缺失/无效/过期、`2` 因网络或上游异常无法确认。
 
 ## 鸣谢与参考
 

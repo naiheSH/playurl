@@ -9,6 +9,7 @@
 - `playurl.py`：用 `track_id` 请求播放地址，并可解密带 `#auth=` 的音频。
 - `auth.py`：可复用的 Python 登录 API，纯 HTTP 创建/轮询二维码、处理短信二次验证和保存 Cookie；只使用标准库。
 - `login.py`：`auth.py` 的命令行封装，默认不打开浏览器；`--browser` 是显式兜底。
+- `check.py`：请求只读账号接口，判断 Cookie 是否真实有效或已过期。
 - `login.cjs`：同一流程的自包含 Node.js 18+ 单文件版本，无需 `npm install`。
 - `requirements.txt`：仅终端绘制二维码或 `--browser` 兜底需要，基础 Python 登录不需要安装。
 - `THIRD_PARTY_NOTICES.md`：登录协议实现与内嵌二维码组件的来源、版本及许可证说明。
@@ -18,6 +19,7 @@
 
 ```text
 python3 playurl/qishui/login.py
+python3 playurl/qishui/check.py
 node playurl/qishui/login.cjs
 python3 playurl/qishui/search.py <歌名|歌名 歌手|歌手 歌名> [limit] [offset]
 python3 playurl/qishui/playlist.py search <关键词> [limit] [offset]

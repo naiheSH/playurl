@@ -8,6 +8,7 @@
 - `playlist.py`：公开搜歌单、按曲目偏移列歌、读取已登录账号的歌单。
 - `playurl.py`：用 songmid 换短期播放地址。
 - `login.py`：模拟 QQ 音乐手机客户端，打开本机浏览器二维码页并写入 cookie。
+- `check.py`：请求“我的喜欢”只读接口，判断 Cookie 是否真实有效或已过期。
 - `requirements.txt`：仅 `login.py` 需要。
 - `cookie`：登录凭据。已被 gitignore，不要提交。
 
@@ -18,6 +19,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r playurl/qq/requirements.txt
 python playurl/qq/login.py
+python3 playurl/qq/check.py
 python3 playurl/qq/search.py <歌名|歌名 歌手|歌手 歌名> [limit] [offset]
 python3 playurl/qq/playlist.py search <关键词> [limit] [offset]
 python3 playurl/qq/playlist.py tracks <歌单 id> [limit] [offset]

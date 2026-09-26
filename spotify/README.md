@@ -7,6 +7,7 @@
 - `search.py`：搜索歌曲元数据。
 - `playlist.py`：搜索公开歌单、列歌和读取当前用户歌单。
 - `playurl.py`：明确返回不可作为通用音频 URL 播放，同时提供 Spotify URI、网页和 Embed URL。
+- `check.py`：验证用户 access token；没有用户 token 时验证 Client Credentials。
 - `credentials`：可选 OAuth 配置 JSON，已被 gitignore，不要提交。
 
 ## 命令
@@ -17,6 +18,7 @@ python3 playurl/spotify/playlist.py search <关键词> [limit] [offset]
 python3 playurl/spotify/playlist.py tracks <playlist_id> [limit] [offset]
 python3 playurl/spotify/playlist.py mine [limit] [offset]
 python3 playurl/spotify/playurl.py <spotify_track_id> [--json]
+python3 playurl/spotify/check.py
 ```
 
 ## OAuth 配置
