@@ -33,6 +33,13 @@ v2.0.0 将 main 的传统独立包与 `skill-studio` 分支的国内平台 Skill
 - 新增 Skill Studio 包结构、JSON 协议、能力路由、凭据注入、敏感信息防泄露和 ZIP 内容测试。
 - GitHub Actions 会分别生成四个 Skill Studio ZIP，并上传到 main 共用的 `v2.0.0` Release。
 
+## main Release 资产
+
+- `netease-2.0.0.zip`
+- `qq-2.0.0.zip`
+- `kugou-2.0.0.zip`
+- `qishui-2.0.0.zip`
+
 ## Skill Studio Release 资产
 
 - `playurl-netease-skill-studio-2.0.0.zip`
