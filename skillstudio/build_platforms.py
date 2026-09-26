@@ -9,7 +9,6 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
-PACKAGE_VERSION = "2.0.0"
 ENVELOPE = {
     "type": "object",
     "required": ["ok"],
@@ -177,7 +176,7 @@ def action_description(provider, action):
     return names[action] + f" 入口 scripts/runtime.py，action={action}。"
 
 
-def metadata(provider):
+def metadata(provider, version):
     spec = SPECS[provider]
     caps = []
     for action in spec["actions"]:
@@ -239,13 +238,13 @@ def metadata(provider):
     ]}
     manifest = {
         "display_name": spec["display"], "generated_by": "local-skillstudio-completion",
-        "profile": "skill-studio-create/submission-v1", "skill_name": f"playurl-{provider}", "version": PACKAGE_VERSION,
+        "profile": "skill-studio-create/submission-v1", "skill_name": f"playurl-{provider}", "version": version,
     }
     skill_metadata = {
         "capability_boundary": "\n".join(item["description"] for item in caps),
         "description": spec["description"], "display_name": spec["display"],
         "out_of_scope_boundary": "非当前平台的搜索或播放", "skill_name": f"playurl-{provider}",
-        "test_cases": [], "tools": [item["name"] for item in TOOLS], "version": PACKAGE_VERSION,
+        "test_cases": [], "tools": [item["name"] for item in TOOLS], "version": version,
     }
     return {
         ".skill-studio/contract.json": contract,
@@ -267,9 +266,21 @@ def write_json(path, value):
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def sync(provider):
+def current_version(provider):
+    path = HERE / provider / "skill-metadata.json"
+    if path.is_file():
+        try:
+            value = json.loads(path.read_text(encoding="utf-8")).get("version")
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+        except (OSError, ValueError):
+            pass
+    return "0.0.0"
+
+
+def sync(provider, version=None):
     package = HERE / provider
-    for relative, value in metadata(provider).items():
+    for relative, value in metadata(provider, version or current_version(provider)).items():
         write_json(package / relative, value)
     agents = package / "agents" / "openai.yaml"
     agents.parent.mkdir(parents=True, exist_ok=True)
@@ -303,6 +314,9 @@ def build(provider, output=None, version=None):
                 target = stage / path.relative_to(package)
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(path, target)
+        if version:
+            for relative, value in metadata(provider, version).items():
+                write_json(stage / relative, value)
         scripts = stage / "scripts"
         for name in ("search.py", "playlist.py", "playurl.py", "check.py"):
             shutil.copy2(ROOT / provider / name, scripts / name)

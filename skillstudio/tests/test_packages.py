@@ -40,7 +40,7 @@ class SkillStudioPackageTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             for provider in PROVIDERS:
                 with self.subTest(provider=provider):
-                    output = self.builder.build(provider, Path(temporary) / f"{provider}.zip")
+                    output = self.builder.build(provider, Path(temporary) / f"{provider}.zip", "9.8.7")
                     with zipfile.ZipFile(output) as archive:
                         names = set(archive.namelist())
                         contract = json.loads(archive.read(".skill-studio/contract.json"))
@@ -68,8 +68,8 @@ class SkillStudioPackageTests(unittest.TestCase):
                         {"gf-service-kv-get", "gf-service-kv-set"},
                     )
                     self.assertTrue(all(item["version"] is None for item in dependencies["depends_on_tools"]))
-                    self.assertEqual(manifest["version"], "2.0.0")
-                    self.assertEqual(skill_metadata["version"], "2.0.0")
+                    self.assertEqual(manifest["version"], "9.8.7")
+                    self.assertEqual(skill_metadata["version"], "9.8.7")
                     if provider == "youtube":
                         self.assertEqual(generated["generatedCode"][0]["dependencies"], ["yt-dlp"])
 
