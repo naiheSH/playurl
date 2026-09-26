@@ -42,10 +42,10 @@ python3 playurl/<platform>/playurl.py <id> [quality] --json
 python3 playurl/netease/login.py   # 网易云音乐 App 扫码
 python3 playurl/qq/login.py        # QQ 音乐 App 扫码，不用 QQ/微信
 python3 playurl/kugou/login.py     # 酷狗音乐 App 扫码
-python3 playurl/qishui/login.py    # 独立 Chrome/Edge 官方登录窗口
+python3 playurl/qishui/login.py    # 汽水 App 扫码，默认纯 HTTP、无需浏览器
 ```
 
-四个平台首次使用扫码登录前分别安装其同目录 `requirements.txt`。网易云、QQ 和酷狗会在终端绘制二维码，并提供随机 `127.0.0.1` 备用页面；传 `--no-open` 可只用终端。汽水默认打开独立的可见 Chrome/Edge 官方页面，因为当前上游要求扫码、确认和 Cookie 收集保持在同一浏览器签名会话；`--direct-qr` 只作为实验性诊断模式。
+网易云、QQ 和酷狗首次扫码登录前分别安装其同目录 `requirements.txt`。它们会在终端绘制二维码，并提供随机 `127.0.0.1` 备用页面；传 `--no-open` 可只用终端。汽水默认登录只使用 Python 标准库，不打开浏览器；只有显式传入 `--browser` 时才需要安装 `qishui/requirements.txt`。
 
 `<platform>` 只替换成上表里的目录名。QQ 搜歌不支持 `offset`。Spotify 的搜索和歌单命令需要官方 OAuth 配置，播放命令不会返回音频直链。YouTube 不支持 `mine`。
 
@@ -169,7 +169,8 @@ YouTube 是单独的音源，不冒充 Spotify。歌曲搜索、真实歌单搜�
 - QQ 音乐基础接口：[ylw1997/qqmusic-api](https://github.com/ylw1997/qqmusic-api)
 - QQ 音乐 App 扫码登录与客户端协议：[L-1124/QQMusicApi](https://github.com/L-1124/QQMusicApi)
 - 酷狗音乐：[MakcRe/KuGouMusicApi](https://github.com/MakcRe/KuGouMusicApi)
-- 汽水音乐：[guowenye/qishui-api](https://github.com/guowenye/qishui-api)
+- 汽水音乐基础接口：[guowenye/qishui-api](https://github.com/guowenye/qishui-api)
+- 汽水纯 HTTP 扫码、状态机与短信验证：[LuoYe17/ly-music-source](https://github.com/LuoYe17/ly-music-source)
 - 汽水扫码状态、浏览器签名与限流研究：[sodahub-org/libresoda](https://github.com/sodahub-org/libresoda)
 - YouTube 媒体解析：[yt-dlp/yt-dlp](https://github.com/yt-dlp/yt-dlp)
 

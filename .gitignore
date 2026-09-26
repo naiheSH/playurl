@@ -23,6 +23,8 @@ credentials
 cookies.txt
 credentials.json
 client_secret*.json
+.qishui-state/
+login-qr.png
 
 # Editor and OS
 .DS_Store

@@ -55,7 +55,7 @@ YouTube 的 `high` 选择 `bestaudio[ext=m4a]`，其次 MP3。`standard` 使用�
 - 网易云先请求 eapi，再回退旧的播放 URL 接口。两条都没有 URL 才失败。
 - QQ 会先补 `media_mid`，再换 `purl`，并用 `Range: bytes=0-1` 探测候选 CDN。探测不是播放，只确认 200 或 206。
 - 酷狗按 tracker、gateway、网页接口、网页重试、移动页的顺序尝试。JSON 里的 `source` 表示命中哪一条。
-- 汽水未登录或登录接口空正文时回退公开详情。请求返回的 URL 时必须带 `httpHeaders`。带 `#auth=` 的结果先用同目录 `playurl.py <id> --decrypt <输出文件>` 解密。
+- 汽水未登录或登录接口空正文时回退公开详情。请求返回的 URL 时必须带 `httpHeaders`。带 `#auth=` 的结果先用同目录 `playurl.py <id> --decrypt <输出文件>` 解密。个人内容先用 `qishui/login.py` 纯 HTTP 扫码；不要默认打开浏览器。
 - YouTube 的格式选择和有效期由 `yt-dlp` 给出。公开内容通常不需要 cookie；受限内容才读取同目录凭据文件。
 - Spotify 固定返回官方 URI、网页和 Embed 地址。不要把预览片段改写成通用音频 URL。
 

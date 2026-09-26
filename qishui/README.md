@@ -1,21 +1,24 @@
 # 汽水音乐
 
-独立目录。不引用本目录以外的代码。播放、搜索、歌单和解密脚本只使用 Python 标准库；终端二维码显示使用同目录 `requirements.txt`。
+独立目录。不引用本目录以外的代码。播放、搜索、歌单、解密以及默认登录流程只使用 Python 标准库。`auth.py` 可直接集成到其他 Python 程序；`login.py` 是它的命令行封装。两者都无需浏览器或 Node.js。
 
 ## 文件
 
 - `search.py`：公开搜歌。不读 cookie。
 - `playlist.py`：读取登录账号的歌单、我的喜欢、最近播放和歌单曲目。
 - `playurl.py`：用 `track_id` 请求播放地址，并可解密带 `#auth=` 的音频。
-- `login.py`：默认打开独立 Chrome/Edge 官方登录窗口，扫码后从同一浏览器会话写入 cookie；保留实验性纯 HTTP 二维码模式。
-- `requirements.txt`：仅 `login.py` 需要。
+- `auth.py`：可复用的 Python 登录 API，纯 HTTP 创建/轮询二维码、处理短信二次验证和保存 Cookie；只使用标准库。
+- `login.py`：`auth.py` 的命令行封装，默认不打开浏览器；`--browser` 是显式兜底。
+- `login.cjs`：同一流程的自包含 Node.js 18+ 单文件版本，无需 `npm install`。
+- `requirements.txt`：仅终端绘制二维码或 `--browser` 兜底需要，基础 Python 登录不需要安装。
+- `THIRD_PARTY_NOTICES.md`：登录协议实现与内嵌二维码组件的来源、版本及许可证说明。
 - `cookie`：登录凭据。已被 gitignore，不要提交。
 
 ## 命令
 
 ```text
-python3 -m pip install -r playurl/qishui/requirements.txt
 python3 playurl/qishui/login.py
+node playurl/qishui/login.cjs
 python3 playurl/qishui/search.py <歌名|歌名 歌手|歌手 歌名> [limit] [offset]
 python3 playurl/qishui/playlist.py search <关键词> [limit] [offset]
 python3 playurl/qishui/playlist.py mine [limit] [offset]
@@ -23,11 +26,91 @@ python3 playurl/qishui/playlist.py tracks <歌单 id|liked|recent> [limit] [offs
 python3 playurl/qishui/playurl.py <track_id> [--decrypt output.m4a] [--json]
 ```
 
-`login.py` 默认启动系统已有的 Chrome、Edge 或 Chromium，并打开汽水官方页面。浏览器使用一次性临时配置目录；扫码成功后脚本从同一浏览器上下文收集汽水会话 Cookie，原子写入同目录 `cookie` 并设置权限 `0600`，随后删除临时配置。凭据不会输出到终端。
+## 推荐：无浏览器 Python 登录
 
-纯 HTTP 二维码流程保留用于诊断：`python3 playurl/qishui/login.py --direct-qr`。该模式会在终端画二维码并提供随机 `127.0.0.1` 备用页面；`--no-open` 可关闭备用页面。当前上游会按设备身份限流，并可能在手机确认后仍不给纯 HTTP 会话返回登录 Cookie，因此不要把它作为默认登录方式，也不要连续刷新二维码。
+```text
+python3 playurl/qishui/login.py
+```
 
-二维码必须由上游返回的 `qrcode_index_url` 原样生成。不要改写成其他跳转链接，也不要直接复用响应附带的二维码图片；这两种做法可能在 App 中显示“无法访问”或让确认状态一直停在 `scanned`。
+默认流程只使用 Python 标准库，不启动浏览器，也不需要安装依赖。脚本把上游返回的官方二维码保存为同目录 `login-qr.png`，使用汽水音乐 App 扫码并在手机确认；若服务端要求短信二次验证，会在终端提示输入验证码。成功后完整 Cookie 被原子写入同目录 `cookie`，权限为 `0600`，不会回显凭据。二维码在流程结束后默认删除。
+
+如果已安装可选的 `terminal-qrcode`，还会同时在终端绘制二维码；没有安装不会影响图片扫码。Homebrew Python 出现 `externally-managed-environment` 时无需为了基础登录安装任何包。确实需要终端二维码或浏览器兜底时，请使用虚拟环境：
+
+```text
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r playurl/qishui/requirements.txt
+```
+
+常用选项：
+
+```text
+python3 playurl/qishui/login.py --help
+python3 playurl/qishui/login.py --no-terminal
+python3 playurl/qishui/login.py --timeout 900
+python3 playurl/qishui/login.py --qr-file /tmp/qishui.png --keep-qr
+python3 playurl/qishui/login.py --cookie-file /safe/path/cookie --json
+python3 playurl/qishui/login.py --browser
+```
+
+### 集成到其他 Python 逻辑
+
+把整个 `qishui` 目录复制到目标项目后，可直接导入；不要调用 `login.py` 子进程：
+
+```python
+from pathlib import Path
+from qishui.auth import QishuiAuthClient
+
+client = QishuiAuthClient()
+login = client.create_qr_login()
+Path("qishui-login.png").write_bytes(login.qr_png)
+
+result = login.poll()  # 调用方按 retryAfterSec 或约 8 秒间隔继续轮询
+if result.get("mfa", {}).get("needSms"):
+    login.send_mfa_sms()
+    result = login.validate_mfa_sms(input("短信验证码："))
+if result.get("status") == "confirmed" or result.get("ok"):
+    login.save_cookie("cookie")
+```
+
+主要 API：
+
+- `QishuiAuthClient(timeout=30, state_file=...)`：创建客户端，并持久化稳定的设备身份。
+- `client.create_qr_login()`：返回独立的 `QishuiLoginSession`；`qr_png` 是可直接展示的 PNG 字节，`scan_url` 是官方扫码 URL。
+- `login.poll()`：返回 `waiting`、`scanned`、`confirmed`、`expired` 或 `failed`；内置最小轮询间隔与限流冷却。
+- `login.send_mfa_sms()` / `login.validate_mfa_sms(code)`：处理平台要求的短信二次验证。
+- `login.cookie`：仅成功后有值；应当视作密码。优先使用 `login.save_cookie(path)` 安全落盘，不要写日志。
+
+一个 `QishuiLoginSession` 对应一个登录流程，不要跨线程并发调用它，也不要并行刷新多个二维码。
+
+## 无依赖 Node.js 单文件
+
+```text
+node playurl/qishui/login.cjs
+```
+
+要求 Node.js 18 或更高版本。`login.cjs` 已把登录逻辑和二维码渲染器打包进一个文件，使用者不需要运行 `npm install`，也不需要安装或启动 Chrome、Chromium、Edge、Electron、Playwright。
+
+运行后会同时在终端绘制二维码，并把官方二维码保存为同目录 `login-qr.png`。使用汽水音乐 App 扫码并在手机确认；若服务端要求短信二次验证，脚本会发送验证码并在终端提示输入。成功后会把完整 Cookie 原子写入同目录 `cookie`，权限设为 `0600`，不会在终端回显凭据。二维码图片在流程结束后默认删除。
+
+常用选项：
+
+```text
+node playurl/qishui/login.cjs --help
+node playurl/qishui/login.cjs --no-terminal
+node playurl/qishui/login.cjs --timeout 900
+node playurl/qishui/login.cjs --qr-file /tmp/qishui.png --keep-qr
+node playurl/qishui/login.cjs --cookie-file /safe/path/cookie --json
+node playurl/qishui/login.cjs --self-test
+```
+
+登录器会持久化随机设备身份到同目录 `.qishui-state/`，并严格降低轮询频率：等待扫码时约 8 秒一次，扫码后约 6.5 秒一次；遇到上游限流会遵从返回的冷却时间。不要并行运行多个登录器，也不要连续刷新二维码。
+
+该通路依赖汽水未公开的 Passport 接口，平台更新后仍可能变化。登录失败时再使用下方 Python 浏览器兼容方案。
+
+## 浏览器兜底
+
+只有纯 HTTP 通路因平台更新失效时才使用 `python3 playurl/qishui/login.py --browser`。该模式需要 `requirements.txt` 中的 Playwright 和系统已有的 Chrome、Edge 或 Chromium；使用一次性临时配置目录，成功后同样只把 Cookie 写入本目录。
 
 直接可播时标准输出只有一行 URL。集成播放器时使用 `--json`，结果里的 `httpHeaders` 必须随音频请求发送；汽水 CDN 会拒绝缺少这些请求头的裸请求。使用 `--decrypt` 或返回的是带 `#auth=` 的加密流时也输出 JSON。失败时输出 JSON。
 

@@ -34,7 +34,7 @@
 | 汽水 | `playlist.py tracks` | GET | `https://api.qishui.com/luna/pc/playlist/detail` | 私有歌单需要 |
 | 汽水 | `playlist.py mine` | GET | `/luna/pc/me`，再请求 `/luna/pc/user/playlist` | 是 |
 | 汽水 | `playurl.py` | GET/POST | `/luna/pc/track_v2`，空正文回退 `https://beta-luna.douyin.com/luna/h5/seo_track` | 会员曲需要 |
-| 汽水 | `login.py` | 浏览器或 GET/POST | 默认打开 `https://music.douyin.com/`；实验模式走 `/passport/web/get_qrcode/` 和 `/passport/web/check_qrconnect/` | 扫码 |
+| 汽水 | `login.py` / `auth.py` | GET/POST | 默认 `https://api.qishui.com/passport/web/get_qrcode/`，轮询 `/passport/web/check_qrconnect/`；需要时再调用 `/passport/web/send_code/` 和 `/passport/web/validate_code/`。`--browser` 才打开 `https://music.douyin.com/` | 扫码 |
 | Spotify | `search.py` | GET | `https://api.spotify.com/v1/search?type=track` | Client Credentials |
 | Spotify | `playlist.py search` | GET | `https://api.spotify.com/v1/search?type=playlist` | Client Credentials |
 | Spotify | `playlist.py tracks` | GET | `https://api.spotify.com/v1/playlists/{id}/items` | 用户 token |
@@ -97,7 +97,7 @@
 
 请求汽水 CDN 时必须带播放结果里的 `httpHeaders`。URL 带 `#auth=` 时，`playurl.py <id> --decrypt <文件>` 会下载并解密，输出 JSON 和解密后的路径。
 
-默认登录打开独立 Chrome/Edge 访问 `https://music.douyin.com/`，从同一浏览器会话收集 cookie。`--direct-qr` 是实验模式：GET `/passport/web/get_qrcode/`，二维码必须使用返回的 `qrcode_index_url`，再 POST `/passport/web/check_qrconnect/`。登录是否完成只看 cookie 里有没有 `sessionid` 一类字段。
+默认登录不打开浏览器。`auth.py` 先 GET `/passport/web/get_qrcode/`，二维码使用返回的 `qrcode_index_url`，再 POST `/passport/web/check_qrconnect/`。手机确认后若要求短信二次验证，再调用 `/passport/web/send_code/` 和 `/passport/web/validate_code/`。登录是否完成只看 cookie 里有没有 `sessionid` 一类字段。`--browser` 才打开 `https://music.douyin.com/`，从同一浏览器会话收集 cookie，只作为纯 HTTP 失效后的兜底。设备身份写在已忽略的 `.qishui-state/`，不要并行刷新多个二维码。
 
 ## Spotify
 

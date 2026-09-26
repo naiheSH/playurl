@@ -12,8 +12,9 @@
 | 汽水 | `qishui/cookie` | 只读同目录文件 |
 | Spotify | `spotify/credentials` | 环境变量优先，其次同目录 JSON |
 | YouTube | `youtube/cookies.txt`、`youtube/token` | 文件存在才传给 `yt-dlp` |
+| 汽水设备身份 | `qishui/.qishui-state/` | 纯 HTTP 登录自动读写，不是播放 cookie |
 
-根 `.gitignore` 已忽略 `cookie`、`token`、`credentials`、`credentials.json`、`client_secret*.json` 和 `cookies.txt`。
+根 `.gitignore` 已忽略 `cookie`、`token`、`credentials`、`credentials.json`、`client_secret*.json`、`cookies.txt`、`.qishui-state/` 和 `login-qr.png`。
 
 ## 必需字段
 
@@ -54,6 +55,6 @@ python3 kugou/login.py
 python3 qishui/login.py
 ```
 
-网易云、QQ、酷狗在终端显示二维码，并提供随机的 `127.0.0.1` 备用页。`--no-open` 不打开浏览器。汽水默认打开独立的可见 Chrome/Edge；`--direct-qr` 只作为实验性诊断，不作为常规登录方式。
+网易云、QQ、酷狗在终端显示二维码，并提供随机的 `127.0.0.1` 备用页。`--no-open` 不打开浏览器。汽水默认不打开浏览器，也不需要安装依赖；它把官方二维码存成 `login-qr.png`，用汽水 App 扫码，必要时在终端输入短信验证码。只有纯 HTTP 失效时才用 `qishui/login.py --browser`。
 
-首次扫码登录前安装该目录自己的 `requirements.txt`。播放、搜索和歌单除 YouTube 外不需要这些可选依赖。
+网易云、QQ、酷狗首次扫码登录前安装该目录自己的 `requirements.txt`。汽水基础登录、播放、搜索和歌单只使用 Python 标准库；YouTube 需要 `yt-dlp`。
