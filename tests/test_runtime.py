@@ -1,6 +1,7 @@
 import importlib.util
 import io
 import json
+import os
 import subprocess
 import sys
 import unittest
@@ -129,25 +130,31 @@ class RuntimeTests(unittest.TestCase):
 
     def test_real_process_protocol_and_legacy_cli_remain_distinct(self):
         track_id = "1234567890123456789012"
+        env = os.environ.copy()
+        env["PYTHONIOENCODING"] = "utf-8"
         runtime = subprocess.run(
             [sys.executable, str(ROOT / "spotify" / "runtime.py")],
             input=json.dumps({"action": "playurl", "id": track_id}),
             text=True,
+            encoding="utf-8",
+            env=env,
             capture_output=True,
             check=False,
         )
-        self.assertEqual(runtime.returncode, 0)
+        self.assertEqual(runtime.returncode, 0, runtime.stderr)
         self.assertEqual(runtime.stderr, "")
         self.assertTrue(json.loads(runtime.stdout)["ok"])
 
         legacy = subprocess.run(
             [sys.executable, str(ROOT / "spotify" / "playurl.py"), track_id],
             text=True,
+            encoding="utf-8",
+            env=env,
             capture_output=True,
             check=False,
         )
-        self.assertEqual(legacy.returncode, 1)
-        self.assertNotIn("\"ok\"", legacy.stdout)
+        self.assertEqual(legacy.returncode, 1, legacy.stderr)
+        self.assertNotIn('"ok"', legacy.stdout)
         self.assertEqual(json.loads(legacy.stdout)["restriction"]["category"], "provider_limited")
 
 
