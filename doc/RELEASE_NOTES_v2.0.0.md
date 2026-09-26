@@ -61,7 +61,7 @@
 - Skill Studio 包不包含扫码登录、设备注册、本地 Cookie、Token、credentials 或浏览器授权脚本。
 - 酷狗 Skill Studio 模式不执行本地设备注册；已有设备字段仍可随 Cookie 使用。
 - ZIP 构建前检查 Runtime、contract、能力映射和禁止文件，避免把本地凭据打入 Release。
-- 构建版本从 Git Tag 自动解析：`vX.Y.Z-skill-studio` 生成 `X.Y.Z` 包，并追加到 main 的 `vX.Y.Z` Release。
+- 构建版本从 Git Tag 自动解析：`skill-studio-vX.Y.Z` 生成 `X.Y.Z` 包，并追加到 main 的 `vX.Y.Z` Release。
 
 ## 跨平台与质量保障
 
@@ -74,8 +74,8 @@
 ## 发布方式
 
 - main Tag 使用 `vX.Y.Z`，构建传统国内平台包。
-- Skill Studio Tag 使用 `vX.Y.Z-skill-studio`，构建四个国内 Skill Studio 包。
-- 两次构建将资产上传到同一个 `vX.Y.Z` GitHub Release，文件名互不覆盖。
+- Skill Studio Tag 使用 `skill-studio-vX.Y.Z`，构建四个国内 Skill Studio 包。
+- 两次构建将资产上传到同一个 `vX.Y.Z` GitHub Release，Release 标题统一为 `playurl vX.Y.Z`。
 - v2.0.0 Release 共包含以下八个资产。
 
 ### main 资产
@@ -87,10 +87,10 @@
 
 ### Skill Studio 资产
 
-- `playurl-netease-skill-studio-2.0.0.zip`
-- `playurl-qq-skill-studio-2.0.0.zip`
-- `playurl-kugou-skill-studio-2.0.0.zip`
-- `playurl-qishui-skill-studio-2.0.0.zip`
+- `skill-studio-netease-2.0.0.zip`
+- `skill-studio-qq-2.0.0.zip`
+- `skill-studio-kugou-2.0.0.zip`
+- `skill-studio-qishui-2.0.0.zip`
 
 ## 明确边界
 

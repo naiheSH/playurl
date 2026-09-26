@@ -138,18 +138,18 @@ jobs:
           if gh release view "$release_tag" >/dev/null 2>&1; then
             gh release upload "$release_tag" dist/*.zip --clobber
             if [[ -f "$notes_file" ]]; then
-              gh release edit "$release_tag" --title "$release_tag" --notes-file "$notes_file"
+              gh release edit "$release_tag" --title "playurl $release_tag" --notes-file "$notes_file"
             fi
           else
             if [[ -f "$notes_file" ]]; then
               gh release create "$release_tag" dist/*.zip \
                 --target "$GITHUB_SHA" \
-                --title "$release_tag" \
+                --title "playurl $release_tag" \
                 --notes-file "$notes_file"
             else
               gh release create "$release_tag" dist/*.zip \
                 --target "$GITHUB_SHA" \
-                --title "$release_tag" \
+                --title "playurl $release_tag" \
                 --generate-notes
             fi
           fi
