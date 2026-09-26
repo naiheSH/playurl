@@ -4,6 +4,24 @@
 
 各平台命令细节在对应目录的 `README.md`。给代理用的流程在同目录 `SKILL.md`。跨平台接口、输出、凭据和播放说明在 `doc/`。
 
+## 运行环境
+
+支持 Python 3.10 或更高版本。核心搜索、歌单、播放和凭据检查脚本使用跨平台标准库写法，可在 Windows 10/11、现代 Linux 和 macOS 上通过 `python` 运行；Unix 终端也可使用 `python3`，Windows 可使用 `py -3.10`。
+
+创建虚拟环境：
+
+```text
+# macOS / Linux
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Windows PowerShell
+py -3.10 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+网易云、QQ 和酷狗登录所需的基础依赖仍放在各自的 `requirements.txt`。汽水默认纯 HTTP 登录不需要第三方包，`qishui/requirements.txt` 只用于浏览器兜底。终端绘制二维码是可选增强，按需安装对应目录的 `requirements-terminal.txt`；安装失败不会再阻断 PNG 或 `127.0.0.1` 二维码通路。
+
 每个平台独立检查自己的凭据，不依赖根目录入口或其他平台脚本：
 
 ```text
@@ -59,7 +77,7 @@ python3 playurl/qishui/login.py    # 汽水 App 扫码，默认纯 HTTP、无需
 node playurl/qishui/login.cjs      # 同一登录流程的 Node.js 18+ 单文件，不是播放入口
 ```
 
-网易云、QQ 和酷狗首次扫码登录前分别安装其同目录 `requirements.txt`。它们会在终端绘制二维码，并提供随机 `127.0.0.1` 备用页面；传 `--no-open` 可只用终端。汽水默认登录只使用 Python 标准库，不打开浏览器；只有显式传入 `--browser` 时才需要安装 `qishui/requirements.txt`。
+网易云、QQ 和酷狗首次扫码登录前分别安装其同目录 `requirements.txt`。安装各自的 `requirements-terminal.txt` 后会在终端绘制二维码；没有该可选组件时继续提供随机 `127.0.0.1` 备用页面或二维码 PNG。传 `--no-open` 可关闭自动打开浏览器。汽水默认登录只使用 Python 标准库，不打开浏览器；只有显式传入 `--browser` 时才需要安装 `qishui/requirements.txt`。
 
 `<platform>` 只替换成上表里的目录名。QQ 搜歌不支持 `offset`。Spotify 的搜索和歌单命令需要官方 OAuth 配置，播放命令不会返回音频直链。YouTube 不支持 `mine`。
 
@@ -171,7 +189,7 @@ YouTube 是单独的音源，不冒充 Spotify。歌曲搜索、真实歌单搜�
 
 ## 凭据
 
-网易云、QQ、酷狗凭据以及汽水个人账号功能的凭据只放各自同目录 `cookie`。四个 `login.py` 都以原子替换写文件并设置权限 `600`。汽水公开搜索、公开歌单和非会员免费曲不要求 Cookie。Spotify 使用 OAuth 环境变量或 `credentials`，不读取网页登录 cookie。根 `.gitignore` 已忽略这些本机文件。
+网易云、QQ、酷狗凭据以及汽水个人账号功能的凭据只放各自同目录 `cookie`。四个 `login.py` 都以原子替换写文件；macOS/Linux 设置权限 `600`，Windows 受文件系统 ACL 语义限制，应确保仓库目录只对当前用户可读。汽水公开搜索、公开歌单和非会员免费曲不要求 Cookie。Spotify 使用 OAuth 环境变量或 `credentials`，不读取网页登录 cookie。根 `.gitignore` 已忽略这些本机文件。
 
 不要把 cookie 或播放签名写入命令、日志、测试、文档或提交。各平台 `check.py` 会实际请求只读账号接口判断是否过期，但只输出状态，不打印值。退出码统一为 `0` 有效或无需凭据、`1` 缺失/无效/过期、`2` 因网络或上游异常无法确认。
 

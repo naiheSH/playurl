@@ -5,7 +5,7 @@ description: 用 playurl/kugou 的独立脚本搜索酷狗歌曲和歌单，并�
 
 # playurl 酷狗
 
-只用 `playurl/kugou/` 里的独立脚本。不要导入本目录外代码，不要请求常驻本地服务，不要把歌名当成 hash。登录和首次设备注册需要同目录 requirements。
+只用 `playurl/kugou/` 里的独立脚本。需要 Python 3.10+。不要导入本目录外代码，不要请求常驻本地服务，不要把歌名当成 hash。登录和首次设备注册需要同目录 `requirements.txt`；终端二维码使用可选的 `requirements-terminal.txt`，缺少时继续使用 PNG 和 `127.0.0.1` 页面。
 
 ## 按用户原话选脚本
 
@@ -26,6 +26,9 @@ description: 用 playurl/kugou 的独立脚本搜索酷狗歌曲和歌单，并�
 在仓库根目录运行。`limit` 和 `offset` 可省略。
 
 ```text
+python3 -m pip install -r playurl/kugou/requirements.txt
+# 可选终端二维码
+python3 -m pip install -r playurl/kugou/requirements-terminal.txt
 python3 playurl/kugou/login.py
 python3 playurl/kugou/check.py
 python3 playurl/kugou/search.py "歌名"

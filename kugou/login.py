@@ -82,9 +82,9 @@ def save_cookie(userid, token, mid, dev, dfid="-", guid=""):
 def show_terminal_qr(image):
     try:
         from terminal_qrcode import draw
-    except ImportError:
+        draw(image).print(end="\n")
+    except (ImportError, OSError, RuntimeError, ValueError):
         return False
-    draw(image).print(end="\n")
     return True
 
 

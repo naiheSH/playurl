@@ -2,6 +2,8 @@
 
 独立的 YouTube 音频地址解析目录。Python 脚本只使用标准库，但必须另外安装当前版本的 `yt-dlp`；解析逻辑不复制到本仓库，因为 YouTube 播放协议、JavaScript challenge 和 PO Token 要求会持续变化。
 
+需要 Python 3.10+。Windows 可把下方命令中的 `python3` 替换为 `py -3.10` 或已激活虚拟环境中的 `python`。
+
 ## 命令
 
 ```text

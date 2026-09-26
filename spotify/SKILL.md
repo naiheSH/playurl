@@ -5,7 +5,7 @@ description: 用 playurl/spotify 的独立标准库脚本查询 Spotify 歌曲�
 
 # playurl Spotify
 
-只使用 `playurl/spotify/` 内的脚本和官方 Spotify API。不要调用下载器、网页抓流、YouTube 或其他平台补一首“同名可播”。
+只使用 `playurl/spotify/` 内的脚本和官方 Spotify API。需要 Python 3.10+；Windows 可用 `py -3.10` 或虚拟环境中的 `python`。不要调用下载器、网页抓流、YouTube 或其他平台补一首“同名可播”。
 
 ## 路由
 

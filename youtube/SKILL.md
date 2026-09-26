@@ -5,7 +5,7 @@ description: 用 playurl/youtube 的 yt-dlp 包装脚本搜索 YouTube 音频和
 
 # playurl YouTube
 
-只使用 `playurl/youtube/` 中的独立脚本和当前版本 `yt-dlp`。不要把 YouTube 冒充 Spotify，也不要把 Spotify 失败改到这里自动补播。不要长期缓存播放 URL。
+只使用 `playurl/youtube/` 中的独立脚本和当前版本 `yt-dlp`。需要 Python 3.10+；Windows 可用 `py -3.10` 或虚拟环境中的 `python`。不要把 YouTube 冒充 Spotify，也不要把 Spotify 失败改到这里自动补播。不要长期缓存播放 URL。
 
 ## 路由
 

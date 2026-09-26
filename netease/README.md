@@ -9,15 +9,24 @@
 - `playurl.py`：用歌曲数字 ID 换短期播放地址。
 - `login.py`：打开本机浏览器二维码页，用网易云音乐 App 扫码后写入 cookie。
 - `check.py`：请求只读账号接口，判断 `MUSIC_U` 是否真实有效或已过期。
-- `requirements.txt`：仅 `login.py` 需要。
+- `requirements.txt`：`login.py` 生成二维码 PNG 所需的跨平台依赖。
+- `requirements-terminal.txt`：可选的终端二维码渲染依赖。
 - `cookie`：登录凭据。已被 gitignore，不要提交。
 
 ## 命令
 
 ```text
+# macOS / Linux
 python3 -m venv .venv
 source .venv/bin/activate
+
+# Windows PowerShell
+py -3.10 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
 python -m pip install -r playurl/netease/requirements.txt
+# 可选：在终端直接绘制二维码
+python -m pip install -r playurl/netease/requirements-terminal.txt
 python playurl/netease/login.py
 python3 playurl/netease/check.py
 python3 playurl/netease/search.py <歌名|歌名 歌手|歌手 歌名> [limit] [offset]
@@ -27,7 +36,7 @@ python3 playurl/netease/playlist.py mine [limit] [offset]
 python3 playurl/netease/playurl.py <歌曲数字 id> [quality] [--json]
 ```
 
-`login.py` 会直接在终端绘制二维码，同时打印并默认打开只监听 `127.0.0.1` 的备用浏览器页面；传 `--no-open` 可只用终端。登录成功后原子写入同目录 `cookie`，文件权限设为 `0600`，终端和浏览器状态接口都不会返回凭据。
+需要 Python 3.10+。`login.py` 始终提供并默认打开只监听 `127.0.0.1` 的二维码页面；安装可选的 `requirements-terminal.txt` 后还会直接在终端绘制二维码。缺少终端组件不会中断登录。传 `--no-open` 可关闭自动打开浏览器。登录成功后原子写入同目录 `cookie`；macOS/Linux 权限设为 `0600`，终端和页面状态接口都不会返回凭据。
 
 二维码内容包含网易网页端要求的 `codekey` 和一次性 `chainId`；不要删掉 `chainId` 后自行重画，否则部分网易云音乐 App 版本无法识别或无法完成确认。
 

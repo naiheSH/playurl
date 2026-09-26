@@ -5,7 +5,7 @@ description: 用 playurl/qishui 的独立脚本登录汽水音乐、搜索歌曲
 
 # playurl 汽水音乐
 
-只使用 `playurl/qishui/` 内的独立实现，不请求常驻本地服务。
+只使用 `playurl/qishui/` 内的独立实现，不请求常驻本地服务。需要 Python 3.10+；无依赖 Node 单文件需要 Node.js 18+。Windows 可用 `py -3.10` 或激活虚拟环境后的 `python` 代替示例中的 `python3`。
 
 ## 路由
 
@@ -31,9 +31,9 @@ description: 用 playurl/qishui 的独立脚本登录汽水音乐、搜索歌曲
 python3 playurl/qishui/login.py
 ```
 
-它保存官方二维码 PNG，使用汽水音乐 App 扫码；上游要求时处理短信二次验证。成功后只把完整 Cookie 原子写入同目录 `cookie`，权限为 `600`。不要打印 Cookie。
+它保存官方二维码 PNG，使用汽水音乐 App 扫码；上游要求时处理短信二次验证。成功后只把完整 Cookie 原子写入同目录 `cookie`；macOS/Linux 权限为 `600`，Windows 依赖目录 ACL。不要打印 Cookie。
 
-终端二维码是可选增强；缺少 `terminal-qrcode` 时使用生成的 PNG，不要因此判定登录失败。只有平台更新导致纯 HTTP 失败时才使用 `--browser`；该兜底需要 Playwright 和本机 Chrome/Edge/Chromium。
+终端二维码是可选增强，通过 `requirements-terminal.txt` 安装；缺少时使用生成的 PNG，不要因此判定登录失败。只有平台更新导致纯 HTTP 失败时才使用 `--browser`；该兜底使用 `requirements.txt` 中的 Playwright 和本机 Chrome/Edge/Chromium。
 
 上游按设备身份限流。不要并行创建多个二维码；轮询应遵守结果中的 `retryAfterSec`。一个 `QishuiLoginSession` 不跨线程并发复用。
 

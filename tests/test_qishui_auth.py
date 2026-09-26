@@ -112,7 +112,8 @@ class QishuiAuthTests(unittest.TestCase):
             target = Path(directory) / "cookie"
             login.save_cookie(target)
             self.assertIn("sessionid=secret-session", target.read_text())
-            self.assertEqual(stat.S_IMODE(os.stat(target).st_mode), 0o600)
+            if os.name != "nt":
+                self.assertEqual(stat.S_IMODE(os.stat(target).st_mode), 0o600)
             validate_call = next(call for call in transport.calls if "/validate_code/" in call[1])
             form = parse_qs(validate_call[3].decode())
             self.assertEqual(form["code"], [AUTH.mix_mode_encode("123456")])

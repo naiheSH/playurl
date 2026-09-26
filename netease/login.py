@@ -75,8 +75,9 @@ def show_terminal_qr(image):
     try:
         from terminal_qrcode import draw
         draw(image).print(end="\n")
-    except ImportError as exc:
-        raise RuntimeError("缺少终端二维码依赖，请先运行：python3 -m pip install -r requirements.txt") from exc
+    except (ImportError, OSError, RuntimeError, ValueError):
+        return False
+    return True
 
 
 PAGE = """<!doctype html><meta charset=utf-8><title>网易云音乐登录</title>
@@ -134,7 +135,8 @@ def main():
     threading.Thread(target=server.serve_forever, daemon=True).start()
     local_url = f"http://127.0.0.1:{server.server_port}/"
     print("请使用网易云音乐 App 扫描下面的二维码：")
-    show_terminal_qr(qr_image)
+    if not show_terminal_qr(qr_image):
+        print("未安装可选的 terminal-qrcode，跳过终端绘制。")
     print("浏览器备用地址：")
     print(local_url)
     if not args.no_open:

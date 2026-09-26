@@ -64,7 +64,37 @@ class PlayUrlTests(unittest.TestCase):
                 with patch.object(module, "HERE", platform_dir), patch.object(module, "COOKIE_FILE", cookie_file):
                     writer(module)
                 self.assertIn(expected, cookie_file.read_text(encoding="utf-8"))
-                self.assertEqual(stat.S_IMODE(os.stat(cookie_file).st_mode), 0o600)
+                if os.name != "nt":
+                    self.assertEqual(stat.S_IMODE(os.stat(cookie_file).st_mode), 0o600)
+
+    def test_terminal_qrcode_is_optional_for_all_login_scripts(self):
+        original_import = __import__
+        for error_type in (ImportError, OSError):
+            def import_without_terminal_qrcode(name, *args, **kwargs):
+                if name == "terminal_qrcode":
+                    raise error_type("optional dependency is unavailable")
+                return original_import(name, *args, **kwargs)
+
+            with self.subTest(error=error_type.__name__), \
+                    patch("builtins.__import__", side_effect=import_without_terminal_qrcode):
+                self.assertFalse(self.netease_login.show_terminal_qr(b"png"))
+                self.assertFalse(self.qq_login.show_terminal_qr(b"png"))
+                self.assertFalse(self.kugou_login.show_terminal_qr(b"png"))
+                self.assertFalse(self.qishui_login._show_terminal_qr("https://example.com/qr"))
+
+    def test_qishui_browser_finds_windows_per_user_install(self):
+        with tempfile.TemporaryDirectory() as directory:
+            executable = Path(directory) / "Google/Chrome/Application/chrome.exe"
+            executable.parent.mkdir(parents=True)
+            executable.touch()
+            with patch.dict(os.environ, {"LOCALAPPDATA": directory}), \
+                    patch.object(self.qishui_login.shutil, "which", return_value=None), \
+                    patch.object(
+                        self.qishui_login.os.path,
+                        "isfile",
+                        side_effect=lambda value: value == str(executable),
+                    ):
+                self.assertEqual(self.qishui_login.chrome_executable(), str(executable))
 
     def test_qq_playlist_search_uses_record_offset(self):
         def fake_get(_url, query, timeout=12, login=False):

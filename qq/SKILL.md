@@ -5,7 +5,7 @@ description: 用 playurl/qq 的独立标准库脚本搜索 QQ 音乐歌曲和歌
 
 # playurl QQ 音乐
 
-只用 `playurl/qq/` 里的独立脚本。搜索、歌单和播放只使用 Python 标准库；登录使用同目录 `requirements.txt` 的手机客户端协议库。不要导入仓库其他代码，不要请求常驻本地服务，不要把歌名当成 songmid。
+只用 `playurl/qq/` 里的独立脚本。需要 Python 3.10+。搜索、歌单和播放只使用 Python 标准库；登录使用同目录 `requirements.txt` 的手机客户端协议库，终端绘制另用可选的 `requirements-terminal.txt`。缺少终端组件时继续使用 `127.0.0.1` 二维码页，不要判定登录失败。不要导入仓库其他代码，不要请求常驻本地服务，不要把歌名当成 songmid。
 
 ## 按用户原话选脚本
 
@@ -28,6 +28,8 @@ description: 用 playurl/qq 的独立标准库脚本搜索 QQ 音乐歌曲和歌
 
 ```text
 python3 -m pip install -r playurl/qq/requirements.txt
+# 可选终端二维码
+python3 -m pip install -r playurl/qq/requirements-terminal.txt
 python3 playurl/qq/login.py
 python3 playurl/qq/check.py
 python3 playurl/qq/search.py "歌名"

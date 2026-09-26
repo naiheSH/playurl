@@ -83,18 +83,34 @@ def save_browser_cookies(cookies: list[dict]) -> Path:
 
 
 def chrome_executable() -> str:
+    local_app_data = os.environ.get("LOCALAPPDATA", "")
+    program_files = os.environ.get("PROGRAMFILES", r"C:\Program Files")
+    program_files_x86 = os.environ.get("PROGRAMFILES(X86)", r"C:\Program Files (x86)")
+    user_applications = Path.home() / "Applications"
     candidates = [
         "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
         "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
-        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
-        r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+        str(user_applications / "Google Chrome.app/Contents/MacOS/Google Chrome"),
+        str(user_applications / "Microsoft Edge.app/Contents/MacOS/Microsoft Edge"),
+        str(Path(program_files) / "Google/Chrome/Application/chrome.exe"),
+        str(Path(program_files_x86) / "Google/Chrome/Application/chrome.exe"),
+        str(Path(program_files) / "Microsoft/Edge/Application/msedge.exe"),
+        str(Path(program_files_x86) / "Microsoft/Edge/Application/msedge.exe"),
     ]
+    if local_app_data:
+        candidates.extend([
+            str(Path(local_app_data) / "Google/Chrome/Application/chrome.exe"),
+            str(Path(local_app_data) / "Microsoft/Edge/Application/msedge.exe"),
+        ])
     for command in (
+        "chrome",
         "google-chrome",
         "google-chrome-stable",
         "chromium",
         "chromium-browser",
         "msedge",
+        "microsoft-edge",
+        "microsoft-edge-stable",
     ):
         found = shutil.which(command)
         if found:
@@ -150,9 +166,9 @@ def browser_login(args: argparse.Namespace) -> None:
 def _show_terminal_qr(url: str) -> bool:
     try:
         from terminal_qrcode import generate
-    except ImportError:
+        generate(url).print(end="\n")
+    except (ImportError, OSError, RuntimeError, ValueError):
         return False
-    generate(url).print(end="\n")
     return True
 
 

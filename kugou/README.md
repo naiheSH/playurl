@@ -11,14 +11,23 @@
 - `check.py`：请求只读个人歌单接口，识别有效 Token 和 `20017` 过期状态。
 - `device.py`：注册酷狗设备并获取播放接口要求的 `dfid`。
 - `requirements.txt`：`login.py` 和首次设备注册需要。
+- `requirements-terminal.txt`：可选的终端二维码渲染依赖。
 - `cookie`：登录凭据。已被 gitignore，不要提交。
 
 ## 命令
 
 ```text
+# macOS / Linux
 python3 -m venv .venv
 source .venv/bin/activate
+
+# Windows PowerShell
+py -3.10 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
 python -m pip install -r playurl/kugou/requirements.txt
+# 可选：在终端直接绘制二维码
+python -m pip install -r playurl/kugou/requirements-terminal.txt
 python playurl/kugou/login.py
 python3 playurl/kugou/check.py
 python3 playurl/kugou/search.py <歌名|歌名 歌手|歌手 歌名> [limit] [offset]
@@ -28,7 +37,7 @@ python3 playurl/kugou/playlist.py mine [limit] [offset]
 python3 playurl/kugou/playurl.py <hash> [quality] [album_id] [album_audio_id] [--json]
 ```
 
-`login.py` 会把官方二维码保存为同目录 `login-qr.png`，并打印、默认打开只监听 `127.0.0.1` 的备用浏览器页面。安装了 `terminal-qrcode` 时还会在终端绘制二维码；没有安装只跳过终端绘制，不会让本地页面退出。传 `--no-open` 可关闭自动打开浏览器，`--keep-qr` 可在流程结束后保留图片。扫码成功后还会注册播放接口要求的设备 `dfid`，再原子写入同目录 `cookie`，文件权限设为 `0600`。旧 cookie 没有有效 `dfid` 时，`playurl.py` 会在已安装依赖的虚拟环境中自动注册一次并安全更新 cookie。终端和浏览器状态接口都不会返回凭据。
+需要 Python 3.10+。`login.py` 会把官方二维码保存为同目录 `login-qr.png`，并打印、默认打开只监听 `127.0.0.1` 的备用浏览器页面。安装可选的 `requirements-terminal.txt` 后还会在终端绘制二维码；没有安装只跳过终端绘制，不会让本地页面退出。传 `--no-open` 可关闭自动打开浏览器，`--keep-qr` 可在流程结束后保留图片。扫码成功后还会注册播放接口要求的设备 `dfid`，再原子写入同目录 `cookie`；macOS/Linux 权限设为 `0600`。旧 cookie 没有有效 `dfid` 时，`playurl.py` 会在已安装依赖的虚拟环境中自动注册一次并安全更新 cookie。终端和浏览器状态接口都不会返回凭据。
 
 播放成功时标准输出只有一行 URL。加 `--json` 才输出完整字段。失败时输出 JSON。
 

@@ -9,15 +9,24 @@
 - `playurl.py`：用 songmid 换短期播放地址。
 - `login.py`：模拟 QQ 音乐手机客户端，打开本机浏览器二维码页并写入 cookie。
 - `check.py`：请求“我的喜欢”只读接口，判断 Cookie 是否真实有效或已过期。
-- `requirements.txt`：仅 `login.py` 需要。
+- `requirements.txt`：`login.py` 使用的 QQ 音乐客户端协议库。
+- `requirements-terminal.txt`：可选的终端二维码渲染依赖。
 - `cookie`：登录凭据。已被 gitignore，不要提交。
 
 ## 命令
 
 ```text
+# macOS / Linux
 python3 -m venv .venv
 source .venv/bin/activate
+
+# Windows PowerShell
+py -3.10 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
 python -m pip install -r playurl/qq/requirements.txt
+# 可选：在终端直接绘制二维码
+python -m pip install -r playurl/qq/requirements-terminal.txt
 python playurl/qq/login.py
 python3 playurl/qq/check.py
 python3 playurl/qq/search.py <歌名|歌名 歌手|歌手 歌名> [limit] [offset]
@@ -27,7 +36,7 @@ python3 playurl/qq/playlist.py mine [limit] [offset]
 python3 playurl/qq/playurl.py <songmid> [quality] [media_mid] [--json]
 ```
 
-`login.py` 使用的是 QQ 音乐 App 自己的二维码协议：请用手机 QQ 音乐 App 扫码，不需要打开 QQ 或微信。脚本会直接在终端绘制二维码，同时打印并默认打开只监听 `127.0.0.1` 的备用浏览器页面；传 `--no-open` 可只用终端。登录成功后原子写入同目录 `cookie`，权限设为 `0600`，不会在终端或页面状态接口返回 token。
+需要 Python 3.10+。`login.py` 使用的是 QQ 音乐 App 自己的二维码协议：请用手机 QQ 音乐 App 扫码，不需要打开 QQ 或微信。脚本始终提供并默认打开只监听 `127.0.0.1` 的二维码页面；安装可选的 `requirements-terminal.txt` 后还会直接在终端绘制二维码。缺少终端组件不会中断登录。传 `--no-open` 可关闭自动打开浏览器。登录成功后原子写入同目录 `cookie`；macOS/Linux 权限设为 `0600`，不会在终端或页面状态接口返回 token。
 
 播放成功时标准输出只有一行 URL。加 `--json` 才输出完整字段。失败时输出 JSON。未传 `media_mid` 时，脚本会按 songmid 查询文件 ID；两者不同时不能只用 songmid 拼文件名。
 

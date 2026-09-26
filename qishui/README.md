@@ -11,7 +11,8 @@
 - `login.py`：`auth.py` 的命令行封装，默认不打开浏览器；`--browser` 是显式兜底。
 - `check.py`：请求只读账号接口；完整 Cookie 失败时用核心 `sessionid` 复检。
 - `login.cjs`：同一流程的自包含 Node.js 18+ 单文件版本，无需 `npm install`。
-- `requirements.txt`：仅终端绘制二维码或 `--browser` 兜底需要，基础 Python 登录不需要安装。
+- `requirements.txt`：仅 `--browser` 兜底需要；基础 Python 登录不需要安装。
+- `requirements-terminal.txt`：可选的终端二维码渲染依赖。
 - `THIRD_PARTY_NOTICES.md`：登录协议实现与内嵌二维码组件的来源、版本及许可证说明。
 - `cookie`：登录凭据。已被 gitignore，不要提交。
 
@@ -34,14 +35,22 @@ python3 playurl/qishui/playurl.py <track_id> [--decrypt output.m4a] [--json]
 python3 playurl/qishui/login.py
 ```
 
-默认流程只使用 Python 标准库，不启动浏览器，也不需要安装依赖。脚本把上游返回的官方二维码保存为同目录 `login-qr.png`，使用汽水音乐 App 扫码并在手机确认；若服务端要求短信二次验证，会在终端提示输入验证码。成功后完整 Cookie 被原子写入同目录 `cookie`，权限为 `0600`，不会回显凭据。二维码在流程结束后默认删除。
+默认流程只使用 Python 标准库，不启动浏览器，也不需要安装依赖。脚本把上游返回的官方二维码保存为同目录 `login-qr.png`，使用汽水音乐 App 扫码并在手机确认；若服务端要求短信二次验证，会在终端提示输入验证码。成功后完整 Cookie 被原子写入同目录 `cookie`；macOS/Linux 权限为 `0600`，不会回显凭据。Windows 使用所在目录的 ACL，应把项目放在当前用户的私有目录中。二维码在流程结束后默认删除。
 
 如果已安装可选的 `terminal-qrcode`，还会同时在终端绘制二维码；没有安装不会影响图片扫码。Homebrew Python 出现 `externally-managed-environment` 时无需为了基础登录安装任何包。确实需要终端二维码或浏览器兜底时，请使用虚拟环境：
 
 ```text
+# macOS / Linux
 python3 -m venv .venv
 source .venv/bin/activate
-python3 -m pip install -r playurl/qishui/requirements.txt
+
+# Windows PowerShell
+py -3.10 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+# 二选一或都安装
+python -m pip install -r playurl/qishui/requirements-terminal.txt
+python -m pip install -r playurl/qishui/requirements.txt
 ```
 
 常用选项：
@@ -50,8 +59,8 @@ python3 -m pip install -r playurl/qishui/requirements.txt
 python3 playurl/qishui/login.py --help
 python3 playurl/qishui/login.py --no-terminal
 python3 playurl/qishui/login.py --timeout 900
-python3 playurl/qishui/login.py --qr-file /tmp/qishui.png --keep-qr
-python3 playurl/qishui/login.py --cookie-file /safe/path/cookie --json
+python3 playurl/qishui/login.py --qr-file qishui-login.png --keep-qr
+python3 playurl/qishui/login.py --cookie-file private-cookie --json
 python3 playurl/qishui/login.py --browser
 ```
 
@@ -93,7 +102,7 @@ node playurl/qishui/login.cjs
 
 要求 Node.js 18 或更高版本。`login.cjs` 已把登录逻辑和二维码渲染器打包进一个文件，使用者不需要运行 `npm install`，也不需要安装或启动 Chrome、Chromium、Edge、Electron、Playwright。
 
-运行后会同时在终端绘制二维码，并把官方二维码保存为同目录 `login-qr.png`。使用汽水音乐 App 扫码并在手机确认；若服务端要求短信二次验证，脚本会发送验证码并在终端提示输入。成功后会把完整 Cookie 原子写入同目录 `cookie`，权限设为 `0600`，不会在终端回显凭据。二维码图片在流程结束后默认删除。
+运行后会同时在终端绘制二维码，并把官方二维码保存为同目录 `login-qr.png`。使用汽水音乐 App 扫码并在手机确认；若服务端要求短信二次验证，脚本会发送验证码并在终端提示输入。成功后会把完整 Cookie 原子写入同目录 `cookie`；macOS/Linux 权限设为 `0600`，不会在终端回显凭据。Windows 使用所在目录的 ACL。二维码图片在流程结束后默认删除。
 
 常用选项：
 
@@ -101,8 +110,8 @@ node playurl/qishui/login.cjs
 node playurl/qishui/login.cjs --help
 node playurl/qishui/login.cjs --no-terminal
 node playurl/qishui/login.cjs --timeout 900
-node playurl/qishui/login.cjs --qr-file /tmp/qishui.png --keep-qr
-node playurl/qishui/login.cjs --cookie-file /safe/path/cookie --json
+node playurl/qishui/login.cjs --qr-file qishui-login.png --keep-qr
+node playurl/qishui/login.cjs --cookie-file private-cookie --json
 node playurl/qishui/login.cjs --self-test
 ```
 
