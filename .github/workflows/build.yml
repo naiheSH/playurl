@@ -129,17 +129,27 @@ jobs:
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: v2.0.0
         run: |
           set -euo pipefail
           ls -R dist
           test "$(find dist -name '*.zip' | wc -l)" -eq 4
-          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            gh release upload "$RELEASE_TAG" dist/*.zip --clobber
-            gh release edit "$RELEASE_TAG" --title "$RELEASE_TAG" --notes-file doc/RELEASE_NOTES_v2.0.0.md
+          release_tag="$GITHUB_REF_NAME"
+          notes_file="doc/RELEASE_NOTES_${release_tag}.md"
+          if gh release view "$release_tag" >/dev/null 2>&1; then
+            gh release upload "$release_tag" dist/*.zip --clobber
+            if [[ -f "$notes_file" ]]; then
+              gh release edit "$release_tag" --title "$release_tag" --notes-file "$notes_file"
+            fi
           else
-            gh release create "$RELEASE_TAG" dist/*.zip \
-              --target "$GITHUB_SHA" \
-              --title "$RELEASE_TAG" \
-              --notes-file doc/RELEASE_NOTES_v2.0.0.md
+            if [[ -f "$notes_file" ]]; then
+              gh release create "$release_tag" dist/*.zip \
+                --target "$GITHUB_SHA" \
+                --title "$release_tag" \
+                --notes-file "$notes_file"
+            else
+              gh release create "$release_tag" dist/*.zip \
+                --target "$GITHUB_SHA" \
+                --title "$release_tag" \
+                --generate-notes
+            fi
           fi
