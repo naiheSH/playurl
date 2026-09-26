@@ -20,6 +20,7 @@ token
 *.cookie
 *.token
 credentials
+cookies.txt
 credentials.json
 client_secret*.json
 
