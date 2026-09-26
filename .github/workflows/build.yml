@@ -105,8 +105,8 @@ jobs:
       - name: Download packages
         uses: actions/download-artifact@v4
         with:
-          pattern: netease|qq|kugou|qishui
           path: dist
+          pattern: "netease|qq|kugou|qishui"
           merge-multiple: true
 
       - name: Publish release
@@ -114,6 +114,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          ls -R dist
           test "$(find dist -name '*.zip' | wc -l)" -eq 4
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
             gh release upload "$GITHUB_REF_NAME" dist/*.zip --clobber
