@@ -43,6 +43,7 @@ python3 playurl/netease/login.py   # 网易云音乐 App 扫码
 python3 playurl/qq/login.py        # QQ 音乐 App 扫码，不用 QQ/微信
 python3 playurl/kugou/login.py     # 酷狗音乐 App 扫码
 python3 playurl/qishui/login.py    # 汽水 App 扫码，默认纯 HTTP、无需浏览器
+node playurl/qishui/login.cjs      # 同一登录流程的 Node.js 18+ 单文件，不是播放入口
 ```
 
 网易云、QQ 和酷狗首次扫码登录前分别安装其同目录 `requirements.txt`。它们会在终端绘制二维码，并提供随机 `127.0.0.1` 备用页面；传 `--no-open` 可只用终端。汽水默认登录只使用 Python 标准库，不打开浏览器；只有显式传入 `--browser` 时才需要安装 `qishui/requirements.txt`。

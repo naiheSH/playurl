@@ -55,6 +55,6 @@ python3 kugou/login.py
 python3 qishui/login.py
 ```
 
-网易云、QQ、酷狗在终端显示二维码，并提供随机的 `127.0.0.1` 备用页。`--no-open` 不打开浏览器。汽水默认不打开浏览器，也不需要安装依赖；它把官方二维码存成 `login-qr.png`，用汽水 App 扫码，必要时在终端输入短信验证码。只有纯 HTTP 失效时才用 `qishui/login.py --browser`。
+网易云、QQ、酷狗在终端显示二维码，并提供随机的 `127.0.0.1` 备用页。`--no-open` 不打开浏览器。汽水默认不打开浏览器，也不需要安装依赖；`python3 qishui/login.py` 或 `node qishui/login.cjs` 都会把官方二维码存成 `login-qr.png`，用汽水 App 扫码。手机确认后仍可能要求短信验证码，验证码只在当次终端输入，不写入文件。只有纯 HTTP 失效时才用 `qishui/login.py --browser`。
 
 网易云、QQ、酷狗首次扫码登录前安装该目录自己的 `requirements.txt`。汽水基础登录、播放、搜索和歌单只使用 Python 标准库；YouTube 需要 `yt-dlp`。

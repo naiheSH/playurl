@@ -97,7 +97,11 @@
 
 请求汽水 CDN 时必须带播放结果里的 `httpHeaders`。URL 带 `#auth=` 时，`playurl.py <id> --decrypt <文件>` 会下载并解密，输出 JSON 和解密后的路径。
 
-默认登录不打开浏览器。`auth.py` 先 GET `/passport/web/get_qrcode/`，二维码使用返回的 `qrcode_index_url`，再 POST `/passport/web/check_qrconnect/`。手机确认后若要求短信二次验证，再调用 `/passport/web/send_code/` 和 `/passport/web/validate_code/`。登录是否完成只看 cookie 里有没有 `sessionid` 一类字段。`--browser` 才打开 `https://music.douyin.com/`，从同一浏览器会话收集 cookie，只作为纯 HTTP 失效后的兜底。设备身份写在已忽略的 `.qishui-state/`，不要并行刷新多个二维码。
+默认登录不打开浏览器，也不需要 Node.js。`auth.py` 先 GET `/passport/web/get_qrcode/`，保存返回的二维码 PNG，扫码内容使用 `qrcode_index_url`。随后 POST `/passport/web/check_qrconnect/`。状态只有 `waiting`、`scanned`、`confirmed`、`expired`、`failed`。手机确认后若 `mfa.needSms` 为真，再调用 `/passport/web/send_code/` 和 `/passport/web/validate_code/`。登录完成只看 cookie 里有没有 `sessionid` 一类字段，不看手机确认状态本身。
+
+调用方必须遵守 `retryAfterSec`。等待时不要快于约 8 秒，已扫码时不要快于约 6.5 秒；`throttled` 时停止刷新，按返回的冷却时间等待。设备身份写在已忽略的 `.qishui-state/`。不要并行创建多个二维码。
+
+`login.cjs` 是同一 Passport 流程的 Node.js 18+ 单文件，只用于登录，不用于搜索或播放。`--browser` 才打开 `https://music.douyin.com/`，只作为纯 HTTP 失效后的兜底。上游没返回可保存的二维码 PNG 时，Python 命令行会提示改用 `login.cjs`。
 
 ## Spotify
 
