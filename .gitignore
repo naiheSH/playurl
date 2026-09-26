@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Local credentials. Each platform keeps its own login state.
+cookie
+token
+*.cookie
+*.token
+credentials
+credentials.json
+client_secret*.json
+
+# Editor and OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
