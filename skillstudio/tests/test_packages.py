@@ -163,6 +163,12 @@ class SkillStudioPackageTests(unittest.TestCase):
                 constants = {item["inputSchema"]["properties"]["action"]["const"] for item in contract["capabilities"]}
                 self.assertEqual(constants, set(ACTIONS[provider]))
 
+    def test_release_filename_is_normalized(self):
+        self.assertEqual(
+            self.builder.archive_filename("kugou", "2.1.3"),
+            "skill-studio-kugou-2.1.3.zip",
+        )
+
     def test_domestic_credentials_are_injected_without_leaking(self):
         cases = {
             "netease": ("MUSIC_U=private-value; os=pc", "private-value"),

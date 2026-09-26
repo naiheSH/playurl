@@ -4,9 +4,14 @@ name: build-skill-studio
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version without v, for example 2.0.0"
+        required: true
+        type: string
   push:
     branches: [skill-studio]
-    tags: ["v*-skill-studio"]
+    tags: ["skill-studio-v*"]
 
 permissions:
   contents: write
@@ -68,14 +73,20 @@ jobs:
         run: |
           set -euo pipefail
           platform="${{ matrix.platform }}"
-          if [[ "${GITHUB_REF}" == refs/tags/v*-skill-studio ]]; then
-            version="${GITHUB_REF_NAME#v}"
-            version="${version%-skill-studio}"
+          if [[ "${GITHUB_REF}" == refs/tags/skill-studio-v* ]]; then
+            version="${GITHUB_REF_NAME#skill-studio-v}"
+          elif [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            version="${{ inputs.version }}"
+            version="${version#v}"
           else
             version="${GITHUB_SHA::7}"
           fi
+          if [[ ! "$version" =~ ^([0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?|[0-9a-f]{7})$ ]]; then
+            echo "invalid release version: $version" >&2
+            exit 2
+          fi
           python skillstudio/build_platforms.py "$platform" --version "$version" --output-dir dist
-          archive="$PWD/dist/playurl-${platform}-skill-studio-${version}.zip"
+          archive="$PWD/dist/skill-studio-${platform}-${version}.zip"
           test -f "$archive"
           unzip -tqq "$archive"
           unzip -Z1 "$archive" > "dist/${platform}.txt"
@@ -93,11 +104,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: skill-studio-${{ matrix.platform }}
-          path: dist/playurl-${{ matrix.platform }}-skill-studio-*.zip
+          path: dist/skill-studio-${{ matrix.platform }}-*.zip
           if-no-files-found: error
 
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/skill-studio-v') || github.event_name == 'workflow_dispatch'
     needs: package-skill-studio
     runs-on: ubuntu-latest
     steps:
@@ -131,26 +142,30 @@ jobs:
         run: |
           set -euo pipefail
           ls -R dist
-          version="${GITHUB_REF_NAME#v}"
-          version="${version%-skill-studio}"
+          if [[ "${GITHUB_REF}" == refs/tags/skill-studio-v* ]]; then
+            version="${GITHUB_REF_NAME#skill-studio-v}"
+          else
+            version="${{ inputs.version }}"
+            version="${version#v}"
+          fi
           release_tag="v${version}"
           notes_file="doc/RELEASE_NOTES_${release_tag}.md"
-          test "$(find dist -name "playurl-*-skill-studio-${version}.zip" | wc -l)" -eq 4
+          test "$(find dist -name "skill-studio-*-${version}.zip" | wc -l)" -eq 4
           if gh release view "$release_tag" >/dev/null 2>&1; then
             gh release upload "$release_tag" dist/*.zip --clobber
             if [[ -f "$notes_file" ]]; then
-              gh release edit "$release_tag" --title "$release_tag" --notes-file "$notes_file"
+              gh release edit "$release_tag" --title "playurl $release_tag" --notes-file "$notes_file"
             fi
           else
             if [[ -f "$notes_file" ]]; then
               gh release create "$release_tag" dist/*.zip \
                 --target main \
-                --title "$release_tag" \
+                --title "playurl $release_tag" \
                 --notes-file "$notes_file"
             else
               gh release create "$release_tag" dist/*.zip \
                 --target main \
-                --title "$release_tag" \
+                --title "playurl $release_tag" \
                 --generate-notes
             fi
           fi

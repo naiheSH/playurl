@@ -302,10 +302,13 @@ def add_file(archive, path, relative):
     archive.writestr(info, path.read_bytes())
 
 
+def archive_filename(provider, version=None):
+    return f"skill-studio-{provider}-{version}.zip" if version else f"skill-studio-{provider}.zip"
+
+
 def build(provider, output=None, version=None):
     package = sync(provider)
-    suffix = f"-{version}" if version else ""
-    output = (output or ROOT / "dist" / f"playurl-{provider}-skill-studio{suffix}.zip").resolve()
+    output = (output or ROOT / "dist" / archive_filename(provider, version)).resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix=f"playurl-{provider}-skillstudio-") as temporary:
         stage = Path(temporary)
@@ -334,10 +337,7 @@ def main():
     args = parser.parse_args()
     providers = SPECS if args.provider == "all" else (args.provider,)
     for provider in providers:
-        filename = (
-            f"playurl-{provider}-skill-studio-{args.version}.zip"
-            if args.version else f"playurl-{provider}-skill-studio.zip"
-        )
+        filename = archive_filename(provider, args.version or None)
         print(build(provider, args.output_dir / filename, args.version or None))
 
 
