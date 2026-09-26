@@ -1,6 +1,6 @@
 name: build
 
-# 每个国内平台单独打 zip。CI 上传 artifact，打 tag 时再发布 Release。不含根 doc。
+# 每个国内平台单独打 zip。CI 各上传一个 artifact，打 tag 时发布四个 zip。不含根 doc。
 
 on:
   workflow_dispatch:
@@ -48,52 +48,67 @@ jobs:
   package:
     needs: test
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [netease, qq, kugou, qishui]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Pack each domestic platform
+      - name: Pack platform
         run: |
           set -euo pipefail
+          platform="${{ matrix.platform }}"
           if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
             version="${GITHUB_REF_NAME#v}"
           else
             version="${GITHUB_SHA::7}"
           fi
           mkdir -p dist
-          for platform in netease qq kugou qishui; do
-            archive="dist/${platform}-${version}.zip"
-            git archive --format=zip --prefix="${platform}/" -o "$archive" "HEAD:${platform}"
-            unzip -Z1 "$archive" > "dist/${platform}.txt"
-            awk -F/ -v platform="$platform" '
-              {
-                for (i = 1; i <= NF; i++) {
-                  if ($i == "cookie" || $i == "token" || $i == "credentials" || $i == "credentials.json" || $i == "cookies.txt" || $i == "tests" || $i == "doc" || $i == "spotify" || $i == "youtube" || $i == "__pycache__" || $i == ".venv") {
-                    print "forbidden path: " $0 > "/dev/stderr"
-                    exit 1
-                  }
+          archive="dist/${platform}-${version}.zip"
+          git archive --format=zip --prefix="${platform}/" -o "$archive" "HEAD:${platform}"
+          unzip -Z1 "$archive" > "dist/${platform}.txt"
+          awk -F/ -v platform="$platform" '
+            {
+              for (i = 1; i <= NF; i++) {
+                if ($i == "cookie" || $i == "token" || $i == "credentials" || $i == "credentials.json" || $i == "cookies.txt" || $i == "tests" || $i == "doc" || $i == "spotify" || $i == "youtube" || $i == "__pycache__" || $i == ".venv") {
+                  print "forbidden path: " $0 > "/dev/stderr"
+                  exit 1
                 }
-                if ($1 != platform && $1 != platform "/") exit 1
               }
-            ' "dist/${platform}.txt"
-            grep -Fxq "${platform}/playurl.py" "dist/${platform}.txt"
-            grep -Fxq "${platform}/README.md" "dist/${platform}.txt"
-            unzip -Z1 "$archive"
-          done
+              if ($1 != platform && $1 != platform "/") exit 1
+            }
+          ' "dist/${platform}.txt"
+          grep -Fxq "${platform}/playurl.py" "dist/${platform}.txt"
+          grep -Fxq "${platform}/README.md" "dist/${platform}.txt"
+          unzip -Z1 "$archive"
 
-      - name: Upload CI packages
+      - name: Upload package
         uses: actions/upload-artifact@v4
         with:
-          name: playurl-platforms-${{ github.sha }}
-          path: dist/*.zip
+          name: ${{ matrix.platform }}
+          path: dist/${{ matrix.platform }}-*.zip
           if-no-files-found: error
 
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download packages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: netease|qq|kugou|qishui
+          path: dist
+          merge-multiple: true
+
       - name: Publish release
-        if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          test "$(find dist -name '*.zip' | wc -l)" -eq 4
           gh release create "$GITHUB_REF_NAME" dist/*.zip \
             --title "$GITHUB_REF_NAME" \
             --generate-notes \
