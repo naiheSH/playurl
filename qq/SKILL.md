@@ -92,7 +92,7 @@ python3 playurl/qq/playurl.py <songmid> exhigh <media_mid>
 2. `standard`：`M500` MP3。
 3. `aac`：`C400` M4A/AAC。
 
-前一档不可用时自动尝试下一档。把 `ENABLE_FLAC` 改为 `True` 后，默认顺序变成 `F000 lossless FLAC → M800 → M500 → C400`。关闭时 `hires`、`lossless`、`jymaster`、`master` 都按 `exhigh` 处理，不得返回 FLAC。
+前一档不可用时自动尝试下一档。把 `ENABLE_FLAC` 改为 `True` 后，默认顺序变成 `F000 lossless FLAC → M800 → M500 → C400`。关闭时 `lossless` 不在可选档里，`flac`、`hires`、`lossless`、`jymaster`、`master` 都会回落到默认 `exhigh`，不得返回 FLAC。`320`、`320k`、`hq` 映射到 `exhigh`；`128`、`128k` 映射到 `standard`。
 
 ## 凭据
 
@@ -104,10 +104,25 @@ QQ 登录 cookie 必须同时有 `uin`，以及 `qm_keyst`、`qqmusic_key`、`mu
 
 只长期保存 songmid、disstid 和曲目序号。播放地址是短期签名 URL。
 
+## 失败时怎么停
+
+| 看到什么 | 怎么处理 |
+| --- | --- |
+| 退出码 2 | 参数、命令或 songmid 格式错误。修正后只运行一次 |
+| 退出码 1 且 `error` 非空 | 停止并报告 `error` |
+| `login_required` | cookie 缺 `uin`/播放 key，或微信登录缺 `wxuin`/`wxskey`。先登录，不改 songmid |
+| `url_unavailable` | 探测后没有可访问文件。不要把非空 `purl` 交出去 |
+| `trial: true` | 试听片段，不要说成完整歌曲 |
+| CDN 404 | 当前候选音质不可达。让脚本继续降级，不要改成版权结论 |
+| 401、403 或接近 `expi` | 用同一个 songmid 重新请求一次 |
+
+搜索最多约 10 条，排序不能补回接口没返回的原曲。不要为了凑结果换平台。
+
 ## 不要做
 
 - 不在脚本之间互相 import。
 - 不调用本地接口补救失败请求。
 - 不把非空 `purl` 直接当成可播放。必须是探测通过的地址。
 - 不把 `media_mid` 写进仓库或当 cookie。
+- 不把 `liked` 当公开 disstid，也不把 disstid 交给 `playurl.py`。
 - 不给搜索、歌单或播放增加第三方依赖；登录依赖只放同目录。

@@ -102,10 +102,24 @@ cookie 需要 `KuGoo`，或 `userid` + `token`，以及 `kg_mid`、有效的 `df
 
 只长期保存 hash、`album_id`、`album_audio_id`、歌单 ID 和曲目序号。
 
+## 失败时怎么停
+
+| 看到什么 | 怎么处理 |
+| --- | --- |
+| 退出码 2 | hash、`album_id` 或 `album_audio_id` 格式错误。不要对调两个专辑字段后盲目重试 |
+| 退出码 1 且 `error` 非空 | 停止并报告 `error` |
+| `error_code` 20010 | 请求体或签名不匹配。不要说成未登录，也不要更换 cookie |
+| `login_required` | 缺 `userid`/`token`。先运行 `login.py`，不改 hash |
+| `trial: true` 或 `tracker_type=part` | 试听。不要说成完整音质 |
+| 其他 `playable: false` | 停止。不要编网页链接代替 |
+| 401 或 403 | 用同一组 hash、`album_id`、`album_audio_id` 重新请求一次 |
+
+播放 JSON 的 `source` 只说明命中了哪条回退链，不是音质，也不是失败原因。酷狗没有 `expi`，不要向用户承诺剩余秒数。
+
 ## 不要做
 
 - 不在脚本之间互相 import。
 - 不调用本地接口补救失败请求。
 - 不把试听地址说成完整音质。
-- 不把 `collection_` ID 当成公开 specialid。
-- 不增加第三方依赖。
+- 不把 `collection_` ID 当成公开 specialid，也不把 hash 当成歌单 ID。
+- 不增加第三方依赖。登录和设备注册依赖只留在同目录 `requirements.txt`。

@@ -60,24 +60,44 @@ python3 playurl/qishui/playurl.py <track_id> --json
 python3 playurl/qishui/playurl.py <track_id> --decrypt output.m4a
 ```
 
-公开歌曲搜索只稳定覆盖首批最多约 30 条候选；歌曲 `offset` 只在这批候选中切片。公开歌单搜索可按记录序号继续翻页。只有歌名和歌手精确对应时才选 ID；多条或不确定时停止并让用户选择。
+公开歌曲搜索只稳定覆盖首批最多约 30 条候选；歌曲 `offset` 只在这批候选中切片，到 30 后为空不是翻页失败。公开歌单搜索可按记录序号继续翻页。只有歌名和歌手精确对应时才选 ID；多条、现场、翻唱或不确定时列出 `id`、`name`、`artist` 后停止。不要选排序第一。
 
-## 歌单与播放
+歌曲搜索对象只用 `id`、`name`、`artist`。`id` 是数字 `item_id`，与 `track_id` 相同。歌单对象保留 `id`、`name`、`trackCount`。用户没指定歌单时不要自动 `tracks`。
 
-公开歌单搜索与公开歌单曲目不需要 Cookie。`mine`、`liked`、`recent` 需要登录 Cookie。`tracks` 返回的歌曲 `id` 逐首交给 `playurl.py`。
+`liked` 和 `recent` 是虚拟歌单 ID，只能交给 `playlist.py tracks`，不能交给 `playurl.py`，也不能当成公开歌单 ID 搜索。
 
-音质不使用命令行位置参数。配置位于 `playurl.py` 顶部 `ENABLE_FLAC`：默认 `False`，排除 FLAC 和潜在无损加密流，在可用 M4A/MP3 中按码率从高到低选；最高档受限时自动降级。只有用户明确要求无损时才改为 `True`。
+## 播放
 
-- 直接 URL：默认标准输出只有一行 URL；接入播放器用 `--json`，并原样发送 `httpHeaders`。
-- 带 `#auth=`：不能直接播放。只有用户明确要求时使用 `--decrypt`。
-- 会员、购买或试听流：不能冒充非会员完整流。
+每首单独运行一次 `playurl.py`。它不接受音质位置参数，多余参数是退出码 2。
+
+配置位于 `playurl.py` 顶部 `ENABLE_FLAC`。默认 `False`，排除 FLAC 和潜在无损加密流，在可用 M4A/MP3 中按码率从高到低选。只有用户明确要求无损时才改为 `True`。
+
+汽水的 `level` 是上游 quality 字符串，不是 `exhigh` 或 `lossless`。比较音质看 `format` 和 `bitrate`。
+
+- 直接 URL：默认标准输出只有一行 URL。接入播放器必须加 `--json`，并原样发送 `httpHeaders`，否则 CDN 可能 403。
+- `encrypted: true` 或 URL 带 `#auth=`：不能直接播放。只有用户明确要求时使用 `--decrypt`。解密输出 JSON，最终路径看 `decryptedFile`。
+- `vip_required`：会员曲。不要改用试听、推荐或分享页地址冒充完整版本。
+- `login_required`：公开详情没有非会员完整流。先纯 HTTP 登录，不要换 track_id。
 - `track_v2` 空响应：脚本会回退目标歌曲公开详情；仍无完整流时停止。
-- 失败和 JSON 模式：输出两空格缩进的多行 JSON。
+- `url_unavailable` 或 `source_unavailable`：停止并报告 `restriction.message`。
+
+成功 JSON 还可能有 `size`、`duration`、`directPlayable`、`source`。`source` 只说明命中了登录接口还是公开详情。
+
+## 失败时怎么停
+
+| 看到什么 | 怎么处理 |
+| --- | --- |
+| 退出码 2 | 命令或 ID 格式错误。不要给播放命令加音质参数 |
+| 退出码 1 且 `error` 非空 | 停止并报告 `error`，不要打印响应正文 |
+| `needSms` | 向用户要验证码，再调用 `validate_mfa_sms`。不要把验证码写入日志 |
+| 登录 `expired` 或 `failed` | 重新运行一次登录。不要并行开多个二维码 |
+| 播放 401 或 403 | 先确认带了 `httpHeaders`；仍失败再用同一 track_id 重新请求一次 |
 
 ## 禁止
 
 - 不用歌曲搜索结果伪造歌单搜索。
-- 不把其他平台 ID 交给汽水脚本。
+- 不把其他平台 ID、歌单 ID、`liked` 或 `recent` 交给 `playurl.py`。
 - 不调用本地接口补救空响应。
 - 不把分享页试听、推荐歌曲或会员流冒充完整播放地址。
 - 不在输出中暴露 Cookie、验证码或会话响应正文。
+- 不把 `login.cjs` 当作播放或搜索入口。

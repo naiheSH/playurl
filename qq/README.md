@@ -42,7 +42,7 @@ ENABLE_FLAC = False
 QUALITY = "lossless" if ENABLE_FLAC else "exhigh"
 ```
 
-默认关闭 FLAC，按 `M800 320k MP3 → M500 标准 MP3 → C400 M4A/AAC` 降级。把 `ENABLE_FLAC` 改为 `True` 后，顺序变为 `F000 FLAC → M800 → M500 → C400`。前一档没有可用地址时会自动尝试下一档。
+默认关闭 FLAC，按 `M800 320k MP3 → M500 标准 MP3 → C400 M4A/AAC` 降级。把 `ENABLE_FLAC` 改为 `True` 后，顺序变为 `F000 FLAC → M800 → M500 → C400`。前一档没有可用地址时会自动尝试下一档。关闭 FLAC 时，`flac`、`lossless`、`hires` 会回落到 `exhigh`，不会返回 FLAC。`320k`、`hq` 等同 `exhigh`，`128k` 等同 `standard`。
 
 返回里 `requested` 是请求档，`level` 来自命中的模板。`expi` 来自接口的 `expiration`，单位秒。
 

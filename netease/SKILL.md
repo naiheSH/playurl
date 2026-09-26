@@ -78,19 +78,35 @@ python3 playurl/netease/playurl.py <歌曲数字 id> standard
 
 ## 音质
 
-配置只改本目录 `playurl.py` 顶部的 `ENABLE_FLAC`。默认是 `False`，顺序为 `exhigh MP3 → standard MP3`；高音质不可用时会自动降级。改成 `True` 后默认顺序为 `lossless FLAC → exhigh MP3 → standard MP3`，脚本会随档位切换 `encodeType`。
+配置只改本目录 `playurl.py` 顶部的 `ENABLE_FLAC`。默认是 `False`，命令行可选档只有 `exhigh`、`standard`。顺序为 `exhigh MP3 → standard MP3`；高音质不可用时会自动降级。改成 `True` 后默认档变成 `lossless`，顺序为 `lossless FLAC → exhigh MP3 → standard MP3`，脚本会随档位切换 `encodeType`。
 
-命令行第二个参数只覆盖这一次。关闭 FLAC 时，`hires`、`lossless`、`jymaster` 会按默认 `exhigh` 处理，不得返回 FLAC。
+命令行第二个参数只覆盖这一次。关闭 FLAC 时，`flac`、`hires`、`lossless`、`jymaster` 不在可选档里，会回落到默认 `exhigh`，不得返回 FLAC。未识别的音质同样回落，不要为此改歌曲 ID。
+
+`level` 与 `requested` 使用同一套名字。实际格式看 `type`，不要只凭 `level` 判断是 MP3 还是 FLAC。`level` 低于 `requested` 是账号或版权限制。
 
 ## 凭据
 
 搜歌和公开歌单不读 cookie。`mine` 和登录播放才读。
 
-没有 `MUSIC_U` 时运行 `login.py`。它打印并打开随机的 `127.0.0.1` 页面，只用于展示二维码和状态；使用网易云音乐 App 扫码后原子写入同目录 `cookie`。这个临时页面不是播放服务。
+没有 `MUSIC_U` 时运行 `login.py`。它打印并打开随机的 `127.0.0.1` 页面，只用于展示二维码和状态；使用网易云音乐 App 扫码后原子写入同目录 `cookie`。这个临时页面不是播放服务。首次使用前安装同目录 `requirements.txt`；搜索、歌单和播放不需要它。
 
 读取顺序只有：环境变量 `NETEASE_MUSIC_U`、环境变量 `MUSIC_U`、同目录 `cookie` 的 `MUSIC_U=`。`mine` 必须走 weapi。不要改成未签名的普通 POST，空 200 不是成功。
 
 不要打印 cookie，不要写入命令、日志、测试、JSON 或提交。文件权限应为 `600`。只长期保存歌曲 ID、歌单 ID 和曲目序号。
+
+## 失败时怎么停
+
+| 看到什么 | 怎么处理 |
+| --- | --- |
+| 退出码 2 | 参数或 ID 格式错误。修正命令，不重试同一命令 |
+| 退出码 1 且 `error` 非空 | 把 `error` 告诉用户并停止 |
+| `playable: false` | 没有可用 URL。不要换平台编地址 |
+| `restriction.category` 为 `url_unavailable` | 上游没有完整地址。不要把空 URL 缓存成成功 |
+| `loggedIn: false` 且会员曲失败 | 先走 `login.py`，不要改歌曲 ID |
+| `trial: true` | 这是试听。明确告诉用户，不要说成完整歌曲 |
+| 401、403 或接近 `expi` | 只用同一个数字歌曲 ID 重新请求一次 |
+
+不要因为搜索排序第一就自动换一首同名曲。不要用其他平台 cookie 补救。
 
 ## 不要做
 
@@ -99,3 +115,4 @@ python3 playurl/netease/playurl.py <歌曲数字 id> standard
 - 不把试听地址说成完整音质。
 - 不给搜索、歌单或播放增加第三方依赖；登录依赖只放同目录。
 - 不把其他平台的 ID 传给这个脚本。
+- 不把歌单 ID 交给 `playurl.py`，也不把歌曲 ID 交给 `playlist.py tracks`。
