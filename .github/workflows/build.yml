@@ -102,13 +102,26 @@ jobs:
     needs: package
     runs-on: ubuntu-latest
     steps:
-      - name: Download packages
+      - name: Download netease
         uses: actions/download-artifact@v4
         with:
+          name: netease
           path: dist
-          pattern: "netease|qq|kugou|qishui"
-          merge-multiple: true
-
+      - name: Download qq
+        uses: actions/download-artifact@v4
+        with:
+          name: qq
+          path: dist
+      - name: Download kugou
+        uses: actions/download-artifact@v4
+        with:
+          name: kugou
+          path: dist
+      - name: Download qishui
+        uses: actions/download-artifact@v4
+        with:
+          name: qishui
+          path: dist
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
