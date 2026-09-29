@@ -6,6 +6,8 @@
 
 需要 Agent Runtime / Code 工具调用时，使用每个平台同目录的 `runtime.py`：它从 stdin 读取一个 JSON 对象，并只向 stdout 返回一个 JSON 对象。完整协议见 [`doc/runtime.md`](doc/runtime.md)。传统 `playurl.py` 不受影响，成功时仍默认只输出一行 URL。
 
+`skill-studio` 分支另有面向 Skill Studio 导入的四个国内平台独立包。适配目录、构建入口和快速检查见 [`skillstudio/README.md`](skillstudio/README.md)，KV 注入、同步规则、CI/Tag 发布和正式 Runtime 验收边界见 [`doc/skill-studio.md`](doc/skill-studio.md)。Skill Studio 包不包含扫码登录和本机凭据。
+
 ## 运行环境
 
 支持 Python 3.10 或更高版本。核心搜索、歌单、播放和凭据检查脚本使用跨平台标准库写法，可在 Windows 10/11、现代 Linux 和 macOS 上通过 `python` 运行；Unix 终端也可使用 `python3`，Windows 可使用 `py -3.10`。
